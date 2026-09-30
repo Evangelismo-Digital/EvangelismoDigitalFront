@@ -31,6 +31,7 @@ export type FormContatoData = z.infer<typeof formContatoSchema>;
 function FormContato(){
     const [successData, setSuccessData] = useState<FormContatoData | null>(null);
     const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
     const { register, handleSubmit, formState:{ errors }, reset } = useForm<FormContatoData>({
         resolver: zodResolver(formContatoSchema) as Resolver<FormContatoData>,
@@ -55,9 +56,11 @@ function FormContato(){
             reset();
             setSuccessData(data);
             setShowError(false);
-        } catch (err) {
+            setErrorMessage(undefined);
+        } catch (err: unknown) {
             console.error("Error submitting form: ", err);
             setShowError(true);
+            setErrorMessage(err instanceof Error ? err.message : undefined);
         }
     }
 
@@ -109,6 +112,7 @@ function FormContato(){
 
             {showError && (
                 <FormContatoError 
+                    message={errorMessage}
                     onClose={() => setShowError(false)}
                 />
             )}
