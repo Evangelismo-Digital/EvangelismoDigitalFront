@@ -1,0 +1,210 @@
+.section {
+    font-family: "Arimo", sans-serif;
+    margin-top: 20px;
+}
+
+.title {
+    text-align: center;
+    font-size: clamp(1.75rem, 5vw, 3rem);
+    font-weight: bold;
+    color: var(--secondary1);
+    margin-bottom: 10px;
+}
+
+.title::after {
+    content: "";
+    display: block;
+    width: 90px;
+    height: 5px;
+    margin: 14px auto 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary1), var(--primary3));
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 1.15rem;
+    color: var(--secondary2);
+    margin-bottom: 36px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 28px 26px;
+    border: 1px solid var(--secondary3);
+    border-radius: 16px;
+    background: var(--white);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: linear-gradient(180deg, var(--primary1), var(--primary3));
+    opacity: 0;
+    transition: opacity .18s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary2);
+}
+
+.card:hover::before,
+.card:focus-visible::before {
+    opacity: 1;
+}
+
+.card:focus-visible {
+    outline: 3px solid var(--primary1);
+    outline-offset: 3px;
+}
+
+.cardIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: var(--primary5);
+    color: var(--primary1);
+    transition: background-color .18s ease, color .18s ease;
+}
+
+.cardIcon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.card:hover .cardIcon,
+.card:focus-visible .cardIcon {
+    background: var(--primary1);
+    color: var(--white);
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.tag {
+    align-self: flex-start;
+    font-size: .78rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--primary1);
+    background: var(--primary5);
+    border-radius: 999px;
+    padding: 5px 12px;
+    margin-bottom: 12px;
+}
+
+.cardTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--black);
+    margin: 0;
+}
+
+.domain {
+    font-size: .9rem;
+    color: var(--secondary2);
+    margin-bottom: 12px;
+    word-break: break-all;
+}
+
+.description {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--secondary1);
+    text-align: left;
+    margin: 0;
+}
+
+.action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: var(--primary1);
+    margin-top: auto;
+}
+
+.actionIcon {
+    width: 18px;
+    height: 18px;
+    transition: transform .18s ease;
+}
+
+.card:hover .actionIcon,
+.card:focus-visible .actionIcon {
+    transform: translate(3px, -3px);
+}
+
+.visuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 991px) {
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+    .card {
+        padding: 24px 20px;
+    }
+    .subtitle {
+        font-size: 1rem;
+        margin-bottom: 28px;
+    }
+    .cardTitle {
+        font-size: 1.3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .cardIcon,
+    .actionIcon,
+    .card::before {
+        transition: none;
+    }
+    .card:hover,
+    .card:focus-visible {
+        transform: none;
+    }
+    .card:hover .actionIcon,
+    .card:focus-visible .actionIcon {
+        transform: none;
+    }
+}
