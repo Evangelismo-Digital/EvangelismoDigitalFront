@@ -18,7 +18,7 @@ npm run preview            # serve dist/
 
 There is no test setup in this repo — no test runner, no test files.
 
-`.npmrc` sets `save-exact=true`, so `npm install <pkg>` pins exact versions. `.env` holds `VITE_API_URL` (backend base URL) and is not committed.
+`.npmrc` sets `save-exact=true`, so `npm install <pkg>` pins exact versions. `.env` holds `CONFIG_API_URL` (backend base URL) and `CONFIG_WEB3FORMS_ACCESS_KEY`. `vite.config.ts` sets `envPrefix: 'CONFIG_'` (not the default `VITE_`); both values are public in the bundle. `.env` is not committed.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ The parallel `<slug>.ts` files exporting the `Article` interface (`src/interface
 
 **SEO** — `src/components/SEO.tsx` is a render-nothing component that imperatively writes `document.title`, meta/OG/Twitter tags, the canonical link and a JSON-LD `<script id="jsonld-seo">` in an effect, and removes the elements it created on unmount so SPA navigation doesn't leak tags. `index.html` carries the static fallback copy of those tags. Base URL and defaults are hardcoded in both `SEO.tsx` and `scripts/generate-sitemap.ts`.
 
-**Backend calls** — `src/config/api.ts` exports `API_URL` from `import.meta.env.VITE_API_URL`. Two endpoints are used: `POST /forms/submit-form` (via the TanStack Query mutation in `src/hook/useFormSubmission.tsx`) and `POST /churches/find-nearest` (in `FindNearestChurch.tsx`). Backend errors matching the `ErrorResponse` shape are detected by `src/util/isErrorResponse.ts`.
+**Backend calls** — `src/config/api.ts` exports `API_URL` from `import.meta.env.CONFIG_API_URL`. Two endpoints are used: `POST /forms/submit-form` (via the TanStack Query mutation in `src/hook/useFormSubmission.tsx`) and `POST /churches/find-nearest` (in `FindNearestChurch.tsx`). Backend errors matching the `ErrorResponse` shape are detected by `src/util/isErrorResponse.ts`.
 
 **Forms** — `FormContato.tsx` holds the shared react-hook-form + Zod form and the success/error modals; `FormContatoHome` and `FormContatoArticle` are thin wrappers around it. `FindNearestChurch` has its own Zod schema (email + 8-digit CEP) and a `SHOW_STATIC_MAP` constant that short-circuits the Google Maps integration until the backend is ready.
 

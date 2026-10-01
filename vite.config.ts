@@ -56,6 +56,7 @@ export default defineConfig({
       }
     })
   ],
+  envPrefix: 'CONFIG_',
   build: {
     outDir: 'dist'
   }

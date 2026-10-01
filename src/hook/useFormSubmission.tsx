@@ -9,7 +9,7 @@ interface Web3FormsResponse {
 
 const formSubmission = async (formData: FormSubmissionData): Promise<Web3FormsResponse> => {
     if (!WEB3FORMS_ACCESS_KEY) {
-        throw new Error("Chave do Web3Forms não configurada no ambiente (VITE_WEB3FORMS_ACCESS_KEY).");
+        throw new Error("Chave do Web3Forms não configurada no ambiente (CONFIG_WEB3FORMS_ACCESS_KEY).");
     }
 
     const payload = {
