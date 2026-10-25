@@ -131,7 +131,7 @@ export default function SEO({
       createdElements.push(jsonLdScript);
     }
 
-    const jsonLdData: any = {
+    const jsonLdData: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": schemaType,
       headline: fullTitle,
@@ -182,6 +182,10 @@ export default function SEO({
     ogType,
     schemaType,
     siteTitle,
+    author,
+    imageAlt,
+    publishedISO,
+    modifiedISO,
   ]);
 
   return null;

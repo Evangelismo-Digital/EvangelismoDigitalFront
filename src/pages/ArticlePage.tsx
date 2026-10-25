@@ -7,6 +7,23 @@ import FindNearestChurch from '../components/FindNearestChurch';
 import { MDXProvider } from '@mdx-js/react';
 import CallToAction from '../components/CallToAction';
 import { getCallToActionContent } from '../config/callToActionContent';
+import type { MDXContent } from 'mdx/types';
+
+interface ArticleFrontmatter {
+  title: string
+  description: string
+  datePublished?: string
+  dateModified?: string
+  author?: string
+  imgMainCoverPage?: string
+  imgArticle?: string
+  imgAlt?: string
+}
+
+interface ArticleModule {
+  default: MDXContent
+  frontmatter: ArticleFrontmatter
+}
 
 const mdxComponents = {
   // You can add more custom components here if needed
@@ -15,8 +32,8 @@ const mdxComponents = {
 const ArticlePage = () => {
   const { artigoId } = useParams<{ artigoId: string }>();
 
-  const [ArticleComponent, setArticleComponent] = useState<any>(null)
-  const [frontmatter, setFrontmatter] = useState<any>(null)
+  const [ArticleComponent, setArticleComponent] = useState<MDXContent | null>(null)
+  const [frontmatter, setFrontmatter] = useState<ArticleFrontmatter | null>(null)
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -38,12 +55,12 @@ const ArticlePage = () => {
         throw new Error("Article not found");
       }
 
-      const module: any = await articleLoader()
+      const module = await articleLoader() as ArticleModule
 
       setArticleComponent(() => module.default)
       setFrontmatter(module.frontmatter)
       setLoading(false);
-      } catch(err) {
+      } catch {
         setError(true);
       } finally {
         setLoading(false);
@@ -64,7 +81,7 @@ const ArticlePage = () => {
     );
   }
 
-  if(error || !ArticleComponent) {
+  if(error || !ArticleComponent || !frontmatter) {
     return (
       <div className="container mt-5">
         <h1>Página não encontrada</h1>
