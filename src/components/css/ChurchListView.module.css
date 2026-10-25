@@ -1,0 +1,241 @@
+/* src/components/css/ChurchListView.module.css */
+
+/*
+ * The results read as a route: a line leaves the searched CEP and passes each
+ * church in order of distance. The nearest stop is the one filled point.
+ */
+.directory {
+    --ink: var(--black2);
+    --muted: var(--secondary1);
+    --accent: var(--primary1);        /* line, markers: non-text, 3.5:1 on white */
+    --accent-text: #b93a17;           /* text on white / --primary5 (>= 5.1:1) */
+    --track: var(--secondary4);
+    --rail: 28px;                      /* left column holding the line and markers */
+
+    width: 100%;
+    font-family: "Arimo", sans-serif;
+    color: var(--ink);
+}
+
+.heading {
+    margin: 0 0 16px;
+    font-family: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+}
+
+.route {
+    position: relative;
+}
+
+/* The line itself, drawn once when the results appear. */
+.route::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    bottom: 28px;
+    left: calc(var(--rail) / 2 - 1px);
+    width: 2px;
+    background: var(--track);
+    transform-origin: top;
+    animation: drawRoute 0.6s ease-out both;
+}
+
+@keyframes drawRoute {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .route::before {
+        animation: none;
+    }
+}
+
+.origin {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0 0 8px;
+    padding-left: var(--rail);
+    min-height: 22px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.originMarker {
+    position: absolute;
+    left: calc(var(--rail) / 2 - 6px);
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--ink);
+    box-shadow: 0 0 0 3px var(--white);
+}
+
+.stops {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.stop {
+    position: relative;
+    margin: 0;
+    padding: 6px 0 6px var(--rail);
+}
+
+.stopMarker {
+    position: absolute;
+    left: calc(var(--rail) / 2 - 7px);
+    top: 22px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--secondary2);
+    background: var(--white);
+    box-sizing: border-box;
+}
+
+.stopNearest .stopMarker {
+    left: calc(var(--rail) / 2 - 9px);
+    top: 20px;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--primary5);
+}
+
+.stopBody {
+    position: relative;
+    padding: 10px 12px;
+    border-radius: 12px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.stopBody:active {
+    background: var(--secundary5);
+}
+
+.stopNearest .stopBody {
+    background: var(--primary5);
+    padding: 14px 16px;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin: 0 0 2px;
+}
+
+.distance {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--accent-text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.nearestTag {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.name {
+    margin: 0 0 4px;
+    font-family: inherit;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.stopNearest .name {
+    font-size: 1.25rem;
+}
+
+.address {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 0 0 4px;
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.icon {
+    flex-shrink: 0;
+}
+
+.addressIcon {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: var(--muted);
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 20px;
+}
+
+.mapLink,
+.directionsLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.mapLink {
+    color: var(--accent-text);
+}
+
+/* The map link covers the whole stop, so a tap anywhere opens the exact point. */
+.mapLink::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+}
+
+.mapLink:focus-visible {
+    outline: none;
+}
+
+.mapLink:focus-visible::after {
+    outline: 3px solid var(--accent-text);
+    outline-offset: 2px;
+}
+
+/* Sits above the stretched map link so it stays tappable on its own. */
+.directionsLink {
+    position: relative;
+    z-index: 2;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.directionsLink:focus-visible {
+    outline: 3px solid var(--accent-text);
+    outline-offset: 2px;
+    border-radius: 4px;
+}

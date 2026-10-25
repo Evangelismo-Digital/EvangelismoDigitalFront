@@ -24,7 +24,6 @@
   "jsonReporter": {
     "fileName": "reports/mutation/mutation.json"
   },
-  "incremental": true,
   "incrementalFile": "reports/stryker-incremental.json",
   "tempDirName": ".stryker-tmp",
   "cleanTempDir": "always",

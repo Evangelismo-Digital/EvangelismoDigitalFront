@@ -1,12 +1,6 @@
+/** Error body sent by the backend's HttpErrorMapper. */
 interface ErrorResponse {
-    localDateTime: Date;
-    errorCode: number;
-    error: string;
-    metodo: string;
-    requestURI: string;
-    map: {
-        [key: string]: string
-    };
     message: string;
+    code: string;
 }
 export default ErrorResponse;
