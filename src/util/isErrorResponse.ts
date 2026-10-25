@@ -1,6 +1,6 @@
 import ErrorResponse from "../interface/ErrorResponse";
 
-function isErrorResponse(error: any): error is ErrorResponse {
-    return error && typeof error.requestURI === "string";
+function isErrorResponse(error: unknown): error is ErrorResponse {
+    return typeof error === "object" && error !== null && typeof (error as { requestURI?: unknown }).requestURI === "string";
 }
 export default isErrorResponse;

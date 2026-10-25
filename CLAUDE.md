@@ -14,9 +14,21 @@ npm run build              # runs prebuild (sitemap) -> tsc -b -> vite build (in
 npm run generate:sitemap   # regenerate public/sitemap.xml via tsx
 npm run lint               # eslint .
 npm run preview            # serve dist/
+npm test                   # Vitest unit/component tests (src/**/*.test.ts(x))
+npm run test:e2e           # Playwright E2E over desktop/tablet/mobile (starts dev server)
+npm run test:mutation      # Stryker over all of src (informational; the gate scopes it)
+npm run prepush            # the pre-push gate (see below)
 ```
 
-There is no test setup in this repo — no test runner, no test files.
+**Tests** — Vitest + React Testing Library, configured in `vitest.config.ts` (kept separate from `vite.config.ts` so the prerender plugin never loads; jsdom, setup in `src/test/setup.ts`). Playwright specs live in `e2e/`, configured in `playwright.config.ts` (Chromium projects `desktop`/`tablet`/`mobile`), type-checked via `tsconfig.test.json`. Mock backend and Web3Forms requests in E2E. Project skills for both are in `.agents/skills` (linked into `.claude/skills`).
+
+**Pre-push gate** — this project's gate is ESLint + Vitest + Playwright + Stryker (not ruff/pytest/mutmut). `scripts/prepush.sh [base]` runs, in order and with these scopes:
+1. **lint** — `eslint . --max-warnings 0` over the whole repo, then `tsc -b`.
+2. **unit** — `vitest run`, the full suite (`src/**/*.test.ts(x)`, `scripts/**/*.test.ts`).
+3. **e2e** — `playwright test`, all specs on `desktop`, `tablet` and `mobile`.
+4. **mutation** — `scripts/mutation-gate.ts` runs Stryker only on the `src` lines added or changed in `base...HEAD` (tests, `src/test/`, `*.d.ts` and `main.tsx` excluded; skipped when no source line changed). It fails on any `Survived` or `NoCoverage` mutant: kill it with a test, or mark a proven equivalent with `// Stryker disable next-line <Mutator>: <reason>`.
+
+`base` defaults to the merge-base with `origin/main`. A local, unversioned `.git/hooks/pre-push` calls the script with the pushed range and refuses to run with uncommitted tracked changes or when the pushed ref is not `HEAD`. After fixing a failed step, re-run just that step with `PREPUSH_ONLY=lint|unit|e2e|mutation npm run prepush`; `PREPUSH_DRYRUN=1` prints the mutation scope. Never bypass with `--no-verify` without the user's say-so. Stryker sandboxes skip `.claude`/`.agents` (`ignorePatterns`) because the skill symlinks break its copy step.
 
 `.npmrc` sets `save-exact=true`, so `npm install <pkg>` pins exact versions. `.env` holds `CONFIG_API_URL` (backend base URL) and `CONFIG_WEB3FORMS_ACCESS_KEY`. `vite.config.ts` sets `envPrefix: 'CONFIG_'` (not the default `VITE_`); both values are public in the bundle. `.env` is not committed.
 
