@@ -30,3 +30,8 @@
         font-size: 1.2rem;
     }
 }
+
+/* Every section the navbar links to: clears the fixed navbar (57px) when scrolled to. */
+.section {
+    scroll-margin-top: 60px;
+}

@@ -10,7 +10,9 @@ const HomePageWrapper = () => {
         const params = new URLSearchParams(location.search);
         const sectionParam = params.get("section") || undefined;
         
-        setSection(sectionParam || "artigos");
+        // No default: a plain "/" opens at the top, where "Artigos" already is, without a scroll that could
+        // land late, after the page loads, and pull back someone who already scrolled down.
+        setSection(sectionParam);
     }, [location.search]);
 
     return <HomePage section={section} />;
