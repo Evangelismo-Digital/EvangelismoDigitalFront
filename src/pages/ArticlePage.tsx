@@ -48,6 +48,9 @@ const ArticlePage = () => {
     const loadArticle = async () => {
     try {
       setLoading(true);
+      // A previous slug may have failed: start each article clean, or a good link would still show "not found".
+      setError(false);
+      // Stryker disable next-line StringLiteral: import.meta.glob takes only a literal, which Vite expands at build time
       const articles = import.meta.glob('../articleContent/articlesData/*.mdx');
       const articleLoader = articles[`../articleContent/articlesData/${artigoId}.mdx`];
 
