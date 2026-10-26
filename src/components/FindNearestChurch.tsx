@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './css/FindNearestChurch.module.css';
 import ChurchListView from './ChurchListView';
 import ChurchRouteIllustration from './ChurchRouteIllustration';
-import { CarIcon, MailIcon, PinIcon, SearchIcon, WalkIcon } from './FindNearestChurchIcons';
+import { CarIcon, MailIcon, PhoneIcon, PinIcon, SearchIcon, WalkIcon } from './FindNearestChurchIcons';
 import { useQueryClient } from '@tanstack/react-query';
 import useNearestChurches, { nearestChurchesQueryKey } from '../hook/useNearestChurches';
 import {
@@ -13,6 +13,7 @@ import {
     NearestChurchesSearch,
     maskCep,
 } from '../util/nearestChurchesApi';
+import { maskPhone } from '../util/phone';
 import { ChurchSearchData, ChurchSearchInput, churchSearchSchema } from '../util/churchSearchSchema';
 import { sendChurchSearchLead } from '../util/churchSearchLead';
 import { track } from '../analytics/analytics';
@@ -38,12 +39,13 @@ function FindNearestChurch() {
     const cepErrorId = `${fieldId}-cep-error`;
     const emailNoticeId = `${fieldId}-email-notice`;
     const emailErrorId = `${fieldId}-email-error`;
+    const phoneErrorId = `${fieldId}-phone-error`;
     const [search, setSearch] = useState<NearestChurchesSearch | null>(null);
-    // The email given with the last submitted search, reused when that search is repeated by car or on foot.
-    // Stryker disable next-line StringLiteral: never read before a submit sets it, as every search starts with one
-    const searchEmail = useRef('');
+    // The contact given with the last submitted search, reused when that search is repeated by car or on foot.
+    // Stryker disable next-line ObjectLiteral,StringLiteral: never read before a submit sets it, as every search starts with one
+    const searchContact = useRef({ email: '', phone: '' });
     // The search still to be reported to the team, once its result is known.
-    const pendingLead = useRef<(NearestChurchesSearch & { email: string }) | null>(null);
+    const pendingLead = useRef<(NearestChurchesSearch & { email: string; phone: string }) | null>(null);
     // Counts searches, so repeating one already on screen is reported (and scrolled to) too.
     const [searchCount, setSearchCount] = useState(0);
     const resultsRef = useRef<HTMLDivElement>(null);
@@ -94,7 +96,7 @@ function FindNearestChurch() {
     } = useForm<ChurchSearchInput, unknown, ChurchSearchData>({
         resolver: zodResolver(churchSearchSchema),
         mode: 'onBlur',
-        defaultValues: { mode: DEFAULT_TRAVEL_MODE },
+        defaultValues: { mode: DEFAULT_TRAVEL_MODE, phone: '' },
     });
 
     // Every search is reported to the team, with the email, once its result is known;
@@ -105,7 +107,7 @@ function FindNearestChurch() {
         if (queryClient.getQueryState(queryKey)?.status === 'error') {
             void queryClient.invalidateQueries({ queryKey });
         }
-        pendingLead.current = { ...next, email: searchEmail.current };
+        pendingLead.current = { ...next, ...searchContact.current };
         scrollPending.current = true;
         setSearch(next);
         // Stryker disable next-line ArithmeticOperator: only a change matters, counting down triggers the report too
@@ -113,6 +115,7 @@ function FindNearestChurch() {
     };
 
     const cepField = register('cep');
+    const phoneField = register('phone');
     // Switching the travel mode after a search repeats it for the same CEP.
     const modeField = register('mode', {
         onChange: (event: { target: { value: unknown } }) => {
@@ -123,8 +126,8 @@ function FindNearestChurch() {
         },
     });
 
-    const onSubmit = ({ mode, cep, email }: ChurchSearchData) => {
-        searchEmail.current = email;
+    const onSubmit = ({ mode, cep, email, phone }: ChurchSearchData) => {
+        searchContact.current = { email, phone };
         runSearch({ cep, mode });
     };
 
@@ -283,6 +286,32 @@ function FindNearestChurch() {
                         </span>
                         <span id={emailErrorId} className={styles.errorMessage} role={errors.email ? 'alert' : undefined}>
                             {errors.email?.message || "\u00A0"}
+                        </span>
+                    </div>
+
+                    <div className={`${styles.field} ${styles.phoneField}`}>
+                        <label className={styles.label} htmlFor={`${fieldId}-phone`}>Telefone (opcional)</label>
+                        <div className={styles.inputWrap}>
+                            <PhoneIcon />
+                            <input
+                                id={`${fieldId}-phone`}
+                                type="tel"
+                                inputMode="tel"
+                                autoComplete="tel-national"
+                                placeholder="(21) 98765-4321"
+                                maxLength={15}
+                                className={styles.input}
+                                aria-invalid={errors.phone ? true : undefined}
+                                aria-describedby={errors.phone ? phoneErrorId : undefined}
+                                {...phoneField}
+                                onChange={(event) => {
+                                    event.target.value = maskPhone(event.target.value);
+                                    return phoneField.onChange(event);
+                                }}
+                            />
+                        </div>
+                        <span id={phoneErrorId} className={styles.errorMessage} role={errors.phone ? 'alert' : undefined}>
+                            {errors.phone?.message || "\u00A0"}
                         </span>
                     </div>
 

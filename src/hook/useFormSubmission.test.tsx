@@ -24,7 +24,7 @@ describe('useFormSubmission', () => {
     const { result } = renderHook(() => useFormSubmission(), { wrapper })
 
     await act(() => result.current.mutateAsync({
-      name: 'Maria', lastName: 'Silva', email: 'maria@email.com', decisaoPorCristo: true, location: 'Niterói',
+      name: 'Maria', lastName: 'Silva', email: 'maria@email.com', phone: '21987654321', decisaoPorCristo: true, location: 'Niterói',
     }))
 
     expect(String(fetchMock.mock.calls[0][0])).toBe('https://api.web3forms.com/submit')
@@ -34,23 +34,25 @@ describe('useFormSubmission', () => {
       from_name: 'Evangelismo Digital',
       name: 'Maria Silva',
       email: 'maria@email.com',
+      telefone: '(21) 98765-4321',
       decisao_por_cristo: 'Sim',
       localizacao: 'Niterói',
-      message: 'Novo contato recebido através do site Evangelismo Digital:\n\nNome: Maria Silva\nEmail: maria@email.com\nDecisão por Cristo: Sim\nLocalização: Niterói',
+      message: 'Novo contato recebido através do site Evangelismo Digital:\n\nNome: Maria Silva\nEmail: maria@email.com\nTelefone: (21) 98765-4321\nDecisão por Cristo: Sim\nLocalização: Niterói',
     })
   })
 
-  it('marks a missing location and no decision', async () => {
+  it('marks a missing phone, location and no decision', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ success: true, message: 'ok' }), { status: 200 })
     )
     const { result } = renderHook(() => useFormSubmission(), { wrapper })
 
     await act(() => result.current.mutateAsync({
-      name: 'João', lastName: 'Souza', email: 'joao@email.com', decisaoPorCristo: false, location: '',
+      name: 'João', lastName: 'Souza', email: 'joao@email.com', phone: '', decisaoPorCristo: false, location: '',
     }))
 
     const body = sentBody(fetchMock as unknown as ReturnType<typeof vi.fn>)
+    expect(body.telefone).toBe('Não informado')
     expect(body.decisao_por_cristo).toBe('Não')
     expect(body.localizacao).toBe('Não informada')
     expect(body.message).toBe('Novo contato recebido através do site Evangelismo Digital:\n\nNome: João Souza\nEmail: joao@email.com\nDecisão por Cristo: Não')
@@ -64,7 +66,7 @@ describe('useFormSubmission', () => {
     const { result } = renderHook(() => useFormSubmission(), { wrapper })
 
     await expect(act(() => result.current.mutateAsync({
-      name: 'Maria', lastName: 'Silva', email: 'maria@email.com', decisaoPorCristo: false, location: null,
+      name: 'Maria', lastName: 'Silva', email: 'maria@email.com', phone: '', decisaoPorCristo: false, location: null,
     }))).rejects.toThrow('Limite excedido')
   })
 })

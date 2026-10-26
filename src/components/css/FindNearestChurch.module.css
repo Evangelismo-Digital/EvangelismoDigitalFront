@@ -233,7 +233,8 @@
     margin-top: 2px;
 }
 
-.emailField {
+.emailField,
+.phoneField {
     margin-top: 4px;
 }
 
