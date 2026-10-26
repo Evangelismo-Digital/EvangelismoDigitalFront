@@ -103,11 +103,11 @@ function PrivacyPage() {
                 <h2>Outros dados que você nos envia</h2>
                 <ul>
                     <li>
-                        <strong>Busca de igrejas:</strong> o CEP e o e-mail que você informa são enviados à nossa equipe
+                        <strong>Busca de igrejas:</strong> o CEP, o e-mail e, se você quiser, o telefone que você informa são enviados à nossa equipe
                         para que possamos ajudar você a conhecer uma igreja. O envio usa o serviço Web3Forms.
                     </li>
                     <li>
-                        <strong>Formulário de contato:</strong> nome, sobrenome, e-mail e as informações que você escolher
+                        <strong>Formulário de contato:</strong> nome, sobrenome, e-mail, telefone (se informado) e as informações que você escolher
                         enviar chegam à nossa equipe pelo mesmo serviço.
                     </li>
                     <li>

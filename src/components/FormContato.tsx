@@ -9,6 +9,7 @@ import { track } from "../analytics/analytics";
 import { contactFormStartEvent, contactFormSubmitEvent } from "../analytics/events";
 import { FormSubmissionData } from "../interface/FormSubmissionData";
 import FormContatoError from "./FormContatoError";
+import { PHONE_INVALID_MESSAGE, isValidBrazilPhone, maskPhone, normalizePhone } from "../util/phone";
 
 const DEFAULT_AUTO_DISMISS_SUCCESS_MS = 5000;
 
@@ -25,6 +26,10 @@ const formContatoSchema = z.object({
     (val) => (typeof val === 'string' ? val.trim().toLowerCase() : val),
     z.string().nonempty("Digite um email.").email("Digite um email válido.")
   ),
+  // Optional: blank is accepted, anything typed must be a Brazilian number with its area code.
+  phone: z.string()
+    .transform(normalizePhone)
+    .refine((val) => val === '' || isValidBrazilPhone(val), PHONE_INVALID_MESSAGE),
   decisaoPorCristo: z.boolean().optional(),
 });
 
@@ -39,9 +44,11 @@ function FormContato(){
         resolver: zodResolver(formContatoSchema) as Resolver<FormContatoData>,
         mode: 'onBlur',
         reValidateMode: 'onChange',
-        defaultValues: { name: '', lastName: '', email: '', decisaoPorCristo: false },
+        // Stryker disable next-line ObjectLiteral: register() reads the blank, unchecked inputs from the DOM without defaults
+        defaultValues: { name: '', lastName: '', email: '', phone: '', decisaoPorCristo: false },
     });
 
+    const phoneField = register('phone');
     const submission = useFormSubmission();
     // One `form_start` per filling-in, on the first keystroke; analytics only runs with consent.
     const started = useRef(false);
@@ -57,6 +64,7 @@ function FormContato(){
             name: data.name,
             lastName: data.lastName,
             email: data.email,
+            phone: data.phone,
             decisaoPorCristo: !!data.decisaoPorCristo,
             location: '',
         };
@@ -103,6 +111,26 @@ function FormContato(){
                     {
                         <p className={styles.errorMessage}>
                             {errors.email ? String(errors.email.message) : "\u00A0"}
+                        </p>
+                    }
+                    <label>
+                        {'Telefone (opcional): '}
+                        <input
+                            type="tel"
+                            inputMode="tel"
+                            autoComplete="tel-national"
+                            placeholder="(21) 98765-4321"
+                            maxLength={15}
+                            {...phoneField}
+                            onChange={(event) => {
+                                event.target.value = maskPhone(event.target.value);
+                                return phoneField.onChange(event);
+                            }}
+                        />
+                    </label>
+                    {
+                        <p className={styles.errorMessage}>
+                            {errors.phone ? String(errors.phone.message) : "\u00A0"}
                         </p>
                     }
                     <label className={styles.checkboxLabel}>

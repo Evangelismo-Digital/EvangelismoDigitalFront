@@ -77,12 +77,14 @@ test.describe('Find nearest church', () => {
     await expect(section(page).locator('iframe')).toHaveCount(0)
     await expect(page.getByRole('region', { name: 'Igrejas mais próximas' })).toHaveCount(0)
 
-    // The button comes after both fields.
+    // The button comes after every field.
     const cepBox = await section(page).getByLabel('CEP').boundingBox()
     const emailBox = await section(page).getByLabel('Email').boundingBox()
+    const phoneBox = await section(page).getByLabel('Telefone (opcional)').boundingBox()
     const buttonBox = await section(page).getByRole('button', { name: 'Buscar igrejas' }).boundingBox()
     expect(emailBox!.y).toBeGreaterThan(cepBox!.y + cepBox!.height)
-    expect(buttonBox!.y).toBeGreaterThan(emailBox!.y + emailBox!.height)
+    expect(phoneBox!.y).toBeGreaterThan(emailBox!.y + emailBox!.height)
+    expect(buttonBox!.y).toBeGreaterThan(phoneBox!.y + phoneBox!.height)
 
     expect(backendUrls).toEqual([])
     expect(mapsScripts).toEqual([])
@@ -212,10 +214,12 @@ test.describe('Find nearest church', () => {
     }
   })
 
-  test('sends the email as a lead with the nearest church', async ({ page }) => {
+  test('sends the email and phone as a lead with the nearest church', async ({ page }) => {
     const { leads } = await mockNetwork(page)
     await page.goto('/')
 
+    await section(page).getByLabel('Telefone (opcional)').pressSequentially('21987654321')
+    await expect(section(page).getByLabel('Telefone (opcional)')).toHaveValue('(21) 98765-4321')
     await search(page, '24020085', 'maria@email.com')
 
     await expect(cards(page)).toHaveCount(5)
@@ -224,6 +228,7 @@ test.describe('Find nearest church', () => {
       access_key: E2E_WEB3FORMS_KEY,
       subject: 'Busca de igreja - CEP 24020-085',
       email: 'maria@email.com',
+      telefone: '(21) 98765-4321',
       como_vai: 'a pé',
       igreja_mais_proxima: 'Igreja Batista Central',
     })

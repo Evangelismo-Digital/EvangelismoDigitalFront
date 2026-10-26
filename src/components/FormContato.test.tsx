@@ -78,3 +78,53 @@ describe('FormContato analytics (only reaches the backend with consent)', () => 
     ])
   })
 })
+
+describe('FormContato phone (optional)', () => {
+  const sentBody = (fetchMock: { mock: { calls: unknown[][] } }) =>
+    JSON.parse(String((fetchMock.mock.calls[0][1] as RequestInit).body))
+
+  it('starts blank, unchecked and with every error line reserved', () => {
+    renderForm()
+
+    for (const label of [/Nome:/, /Sobrenome:/, /Email:/, /Telefone \(opcional\):/]) {
+      expect(screen.getByLabelText(label)).toHaveValue('')
+    }
+    expect(screen.getByRole('checkbox')).not.toBeChecked()
+    const errorLine = screen.getByLabelText(/Telefone \(opcional\):/).closest('label')!.nextElementSibling
+    expect(errorLine?.textContent).toBe('\u00A0')
+  })
+
+  it('masks the phone while typing and sends it formatted', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ success: true, message: 'ok' }), { status: 200 }))
+    const user = renderForm()
+    const phone = screen.getByLabelText(/Telefone \(opcional\):/)
+
+    await user.type(phone, '21987654321')
+    expect(phone).toHaveValue('(21) 98765-4321')
+    await fillAndSend(user)
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    expect(sentBody(fetchMock)).toMatchObject({ telefone: '(21) 98765-4321' })
+  })
+
+  it('sends without a phone', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ success: true, message: 'ok' }), { status: 200 }))
+    const user = renderForm()
+
+    await fillAndSend(user)
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    expect(sentBody(fetchMock)).toMatchObject({ telefone: 'Não informado' })
+  })
+
+  it('blocks an invalid phone with a message', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+    const user = renderForm()
+
+    await user.type(screen.getByLabelText(/Telefone \(opcional\):/), '2198765')
+    await fillAndSend(user)
+
+    expect(await screen.findByText('Digite um telefone válido com DDD.')).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+})

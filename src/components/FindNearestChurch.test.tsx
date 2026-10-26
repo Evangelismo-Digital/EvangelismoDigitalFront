@@ -238,7 +238,7 @@ describe('FindNearestChurch', () => {
       })()
 
       const errorLines = container.querySelectorAll('.errorMessage')
-      expect(errorLines).toHaveLength(2)
+      expect(errorLines).toHaveLength(3)
       errorLines.forEach((line) => expect(line.textContent).toBe('\u00A0'))
     })
 
@@ -816,5 +816,56 @@ describe('FindNearestChurch', () => {
 
       expect(await screen.findByRole('alert')).toHaveTextContent(NEAREST_CHURCHES_MESSAGES.unavailable)
     })
+  })
+})
+
+describe('FindNearestChurch phone (optional)', () => {
+  const phoneInput = () => screen.getByLabelText('Telefone (opcional)')
+
+  it('masks the phone and sends it with the lead, also when the search is repeated by car', async () => {
+    const { user } = renderSection()
+
+    await user.type(phoneInput(), '21987654321')
+    expect(phoneInput()).toHaveValue('(21) 98765-4321')
+    await search(user, '24020085')
+    await screen.findByRole('region', { name: 'Igrejas mais próximas' })
+    await waitFor(() => expect(web3formsCalls()).toHaveLength(1))
+    await user.click(screen.getByRole('radio', { name: 'De carro' }))
+
+    await waitFor(() => expect(web3formsCalls()).toHaveLength(2))
+    expect(leadBody(0)).toMatchObject({ email: 'maria@email.com', telefone: '(21) 98765-4321', como_vai: 'a pé' })
+    expect(leadBody(1)).toMatchObject({ email: 'maria@email.com', telefone: '(21) 98765-4321', como_vai: 'de carro' })
+  })
+
+  it('lays the phone out as a field with its icon', () => {
+    renderSection()
+
+    expect(phoneInput()).toHaveValue('')
+    const field = phoneInput().closest('.field')
+    expect(field).toHaveClass('phoneField')
+    expect(phoneInput().parentElement?.querySelector('svg')).not.toBeNull()
+  })
+
+  it('searches without a phone', async () => {
+    const { user } = renderSection()
+
+    await search(user, '24020085')
+
+    await waitFor(() => expect(web3formsCalls()).toHaveLength(1))
+    expect(leadBody()).toMatchObject({ telefone: 'não informado' })
+    expect(phoneInput()).not.toHaveAttribute('aria-invalid')
+    expect(phoneInput()).not.toHaveAttribute('aria-describedby')
+  })
+
+  it('blocks the search on an invalid phone, pointing the field at its message', async () => {
+    const { user } = renderSection()
+
+    await user.type(phoneInput(), '2198765')
+    await search(user, '24020085')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Digite um telefone válido com DDD.')
+    expect(phoneInput()).toHaveAttribute('aria-invalid', 'true')
+    expect(phoneInput()).toHaveAttribute('aria-describedby', 'find-church-phone-error')
+    expect(backendCalls()).toHaveLength(0)
   })
 })
