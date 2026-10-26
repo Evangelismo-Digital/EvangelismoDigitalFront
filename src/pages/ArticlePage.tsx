@@ -1,7 +1,6 @@
 import styles from './css/ArticlePage.module.css'
 import { useParams } from 'react-router-dom';
 import FormContatoArticle from "../components/FormContatoArticle";
-import { useEffect, useState } from 'react';
 import SEO from '../components/SEO';
 import FindNearestChurch from '../components/FindNearestChurch';
 import { MDXProvider } from '@mdx-js/react';
@@ -29,62 +28,20 @@ const mdxComponents = {
   // You can add more custom components here if needed
 }
 
+// Eager: the article must be there on the very first render. The prerendered HTML holds the full text,
+// so an article that only appeared after an async import would not match it when the page hydrates
+// (React #418) and React would throw the page away and render it again. All articles together are ~11 KB.
+// Stryker disable next-line StringLiteral,ObjectLiteral,BooleanLiteral: import.meta.glob takes only literals, which Vite expands at build time
+const articles = import.meta.glob<ArticleModule>('../articleContent/articlesData/*.mdx', { eager: true });
+
 const ArticlePage = () => {
   const { artigoId } = useParams<{ artigoId: string }>();
 
-  const [ArticleComponent, setArticleComponent] = useState<MDXContent | null>(null)
-  const [frontmatter, setFrontmatter] = useState<ArticleFrontmatter | null>(null)
+  const article = articles[`../articleContent/articlesData/${artigoId}.mdx`];
+  const ArticleComponent = article?.default;
+  const frontmatter = article?.frontmatter;
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    if(!artigoId) {
-      setError(true);
-      setLoading(false);
-      return;
-    }
-
-    const loadArticle = async () => {
-    try {
-      setLoading(true);
-      // A previous slug may have failed: start each article clean, or a good link would still show "not found".
-      setError(false);
-      // Stryker disable next-line StringLiteral: import.meta.glob takes only a literal, which Vite expands at build time
-      const articles = import.meta.glob('../articleContent/articlesData/*.mdx');
-      const articleLoader = articles[`../articleContent/articlesData/${artigoId}.mdx`];
-
-      if (!articleLoader) {
-        throw new Error("Article not found");
-      }
-
-      const module = await articleLoader() as ArticleModule
-
-      setArticleComponent(() => module.default)
-      setFrontmatter(module.frontmatter)
-      setLoading(false);
-      } catch {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadArticle();
-  }, [artigoId]);
-
-  if(loading) {
-    return (
-      <>
-        <div className="container mt-5 text-center">
-          <div className="spinner-border" role="status">
-          </div>
-        </div>
-      </>
-    );
-  }
-
-  if(error || !ArticleComponent || !frontmatter) {
+  if(!ArticleComponent || !frontmatter) {
     return (
       <div className="container mt-5">
         <h1>Página não encontrada</h1>
@@ -112,7 +69,7 @@ const ArticlePage = () => {
 
       <MDXProvider components={mdxComponents}>
         <div className='container mt-5'>
-          <article className={styles.articleSection}>
+          <article className={styles.articleSection} data-analytics-article>
             
             <div className={styles['article-header']}>
               

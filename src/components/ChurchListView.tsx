@@ -1,4 +1,3 @@
-import { useId } from 'react';
 import styles from './css/ChurchListView.module.css';
 import { ChurchItem, Coordinates, buildGoogleMapsUrl, formatDistancePtBr } from '../util/googleMapsUrl';
 import { MAX_CHURCHES, formatCep } from '../util/nearestChurchesApi';
@@ -34,7 +33,8 @@ const DirectionsIcon = () => (
 
 /** The nearest churches drawn as stops on a route that starts at the searched CEP. */
 function ChurchListView({ userCep, mode, churches, origin = null }: ChurchListViewProps) {
-    const headingId = useId();
+    // Fixed rather than useId(), which differs between the client prerender and hydration (React #418).
+    const headingId = 'church-list-heading';
     const travel = TRAVEL_MODES[mode];
     const visibleChurches = churches.slice(0, MAX_CHURCHES);
 
@@ -72,6 +72,7 @@ function ChurchListView({ userCep, mode, churches, origin = null }: ChurchListVi
                                         <a
                                             className={styles.mapLink}
                                             href={buildGoogleMapsUrl(church, 'exact-point')}
+                                            data-analytics="maps-point"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             aria-label={`${rank}ª igreja: ${church.name}, a ${distance}. ${address} Ver no Google Maps (abre em nova aba).`}
@@ -82,6 +83,7 @@ function ChurchListView({ userCep, mode, churches, origin = null }: ChurchListVi
                                         <a
                                             className={styles.directionsLink}
                                             href={buildGoogleMapsUrl(church, 'directions', travel.googleTravelMode, origin)}
+                                            data-analytics="maps-directions"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             aria-label={`Como chegar a ${church.name} ${travel.distanceSuffix} pelo Google Maps (abre em nova aba).`}

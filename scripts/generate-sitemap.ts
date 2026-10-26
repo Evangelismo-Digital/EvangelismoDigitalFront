@@ -24,6 +24,13 @@ async function generateSitemap() {
     priority: 1.0,
   });
 
+  urls.push({
+    loc: `${siteUrl}/privacidade`,
+    lastmod: new Date().toISOString().split('T')[0],
+    changefreq: 'yearly',
+    priority: 0.3,
+  });
+
   // Auto-discover all article files
   const files = fs.readdirSync(articlesDir).filter(f => f.endsWith('.ts'));
 

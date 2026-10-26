@@ -2,9 +2,11 @@ import styles from "./css/FormContato.module.css"
 import { useForm, Resolver } from "react-hook-form";
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from "react";
+import { useRef, useState } from "react";
 import FormContatoSuccess from "./FormContatoSuccess";
 import useFormSubmission from "../hook/useFormSubmission";
+import { track } from "../analytics/analytics";
+import { contactFormStartEvent, contactFormSubmitEvent } from "../analytics/events";
 import { FormSubmissionData } from "../interface/FormSubmissionData";
 import FormContatoError from "./FormContatoError";
 
@@ -41,6 +43,14 @@ function FormContato(){
     });
 
     const submission = useFormSubmission();
+    // One `form_start` per filling-in, on the first keystroke; analytics only runs with consent.
+    const started = useRef(false);
+    const onFormInput = () => {
+        if (!started.current) {
+            started.current = true;
+            track(contactFormStartEvent(window.location.pathname));
+        }
+    };
 
     async function handleFormContato(data: FormContatoData) {
         const payload: FormSubmissionData = {
@@ -53,12 +63,15 @@ function FormContato(){
 
         try {
             await submission.mutateAsync(payload);
+            track(contactFormSubmitEvent(window.location.pathname, true));
+            started.current = false;
             reset();
             setSuccessData(data);
             setShowError(false);
             setErrorMessage(undefined);
         } catch (err: unknown) {
             console.error("Error submitting form: ", err);
+            track(contactFormSubmitEvent(window.location.pathname, false));
             setShowError(true);
             setErrorMessage(err instanceof Error ? err.message : undefined);
         }
@@ -67,7 +80,7 @@ function FormContato(){
     return (
         <>
             <div className={styles.formcontato}>
-                <form onSubmit={handleSubmit(handleFormContato)} name="form" noValidate>
+                <form onSubmit={handleSubmit(handleFormContato)} onInput={onFormInput} name="form" noValidate>
                     <label>
                         Nome: <input type="text" {...register('name') }/>
                     </label>

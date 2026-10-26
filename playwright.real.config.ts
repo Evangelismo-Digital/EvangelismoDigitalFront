@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { refusedConsentState } from './e2e/consentState'
 
 // End-to-end tests against a running backend (opt-in: `npm run test:e2e:real`).
 // Port 5173 matches the backend's default FRONTEND_URL, so CORS allows the dev server.
@@ -18,7 +19,8 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     locale: 'pt-BR',
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure'
+    screenshot: 'only-on-failure',
+    storageState: refusedConsentState
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
@@ -32,7 +34,9 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       CONFIG_API_URL: REAL_API_URL,
-      CONFIG_WEB3FORMS_ACCESS_KEY: 'e2e-real-web3forms-key'
+      CONFIG_WEB3FORMS_ACCESS_KEY: 'e2e-real-web3forms-key',
+      // The dev server proxies /analytics to the same backend; the secret comes from .env (ANALYTICS_PROXY_SECRET).
+      ANALYTICS_API_URL: REAL_API_URL
     }
   }
 })

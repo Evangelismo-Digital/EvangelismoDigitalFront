@@ -1,4 +1,4 @@
-import { ComponentType, useEffect, useId, useRef, useState } from 'react';
+import { ComponentType, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import styles from './css/FindNearestChurch.module.css';
@@ -15,6 +15,8 @@ import {
 } from '../util/nearestChurchesApi';
 import { ChurchSearchData, ChurchSearchInput, churchSearchSchema } from '../util/churchSearchSchema';
 import { sendChurchSearchLead } from '../util/churchSearchLead';
+import { track } from '../analytics/analytics';
+import { churchSearchEvent } from '../analytics/events';
 import { DEFAULT_TRAVEL_MODE, TRAVEL_MODES, TravelMode, isTravelMode } from '../util/travelMode';
 
 export const NO_CHURCHES_WALKING_MESSAGE = 'Nenhuma igreja a até 10 km a pé desse CEP.';
@@ -29,7 +31,9 @@ const MODE_ICONS: Record<TravelMode, ComponentType> = { pedestrian: WalkIcon, tr
 
 function FindNearestChurch() {
     const queryClient = useQueryClient();
-    const fieldId = useId();
+    // A fixed id, not useId(): the prerender is a client render and visitors hydrate it, and React's client
+    // and hydration useId values differ, which would break hydration (React #418). One search per page.
+    const fieldId = 'find-church';
     const cepHintId = `${fieldId}-cep-hint`;
     const cepErrorId = `${fieldId}-cep-error`;
     const emailNoticeId = `${fieldId}-email-notice`;
@@ -58,7 +62,10 @@ function FindNearestChurch() {
         pendingLead.current = null;
         sendChurchSearchLead({ ...lead, nearestChurchName: nearest.data?.churches[0].name ?? null })
             .catch((err: unknown) => console.error('Falha ao enviar o contato da busca de igreja:', err));
-    }, [searchCount, resultKnown, nearest.data]);
+        // Analytics (only with consent) gets the outcome alone: never the CEP or the email.
+        const noChurches = nearest.error instanceof NearestChurchesError && nearest.error.kind === 'no-churches';
+        track(churchSearchEvent(window.location.pathname, lead.mode, nearest.data?.churches.length ?? null, noChurches));
+    }, [searchCount, resultKnown, nearest.data, nearest.error]);
 
     // Each search brings its results into view: once while loading, and again once the list (or error) is
     // shown, since near the end of the page a short loading line cannot be scrolled up to the top yet.
@@ -235,10 +242,13 @@ function FindNearestChurch() {
                             />
                         </div>
                         <span id={cepHintId} className={styles.notice}>
-                            CEP é o código postal de 8 números do seu endereço, como 24230-100. Não sabe o seu?{' '}
+                            {/* One string with its trailing space: text + {' '} would be two text nodes, which the
+                                prerendered HTML merges into one, breaking hydration (React #418). */}
+                            {'CEP é o código postal de 8 números do seu endereço, como 24230-100. Não sabe o seu? '}
                             <a
                                 className={styles.noticeLink}
                                 href={CORREIOS_CEP_SEARCH_URL}
+                                data-analytics="correios"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 aria-label="Consulte nos Correios (abre em nova aba)"

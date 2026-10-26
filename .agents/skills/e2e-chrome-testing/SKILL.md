@@ -12,6 +12,7 @@ description: >-
 
 - Config: `playwright.config.ts`; specs in `e2e/*.spec.ts`; types via `tsconfig.test.json`.
 - Projects: `desktop` (1280x800), `tablet` (768x1024 touch), `mobile` (Pixel 7). All Chromium.
+- Every spec starts with a stored cookie refusal (`use.storageState` = `e2e/consentState.ts`), so the cookie banner stays closed; consent specs override it with `test.use({ storageState: noConsentState })` and set `window.__ANALYTICS_E2E__` via `addInitScript` to be tracked. Route analytics with a URL predicate on `pathname.startsWith('/analytics/')`: a `**/analytics/**` glob also swallows Vite's `/src/analytics/*` modules.
 - `webServer` starts its own `npm run dev` on port 5199 with fake `CONFIG_*` values (never reuses a running server, which may point at a real backend).
 - Artifacts: `test-results/` (screenshots, traces), `playwright-report/` (HTML). Both gitignored.
 - First time on WSL/Linux: `npx playwright install chromium` and `sudo npx playwright install-deps chromium`.
