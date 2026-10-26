@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { refusedConsentState } from './e2e/consentState'
 
 // Its own port: a dev server already running on 5173 (pointed at a real backend) must never be reused here.
 const PORT = 5199
@@ -19,7 +20,8 @@ export default defineConfig({
     baseURL,
     locale: 'pt-BR',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure'
+    screenshot: 'only-on-failure',
+    storageState: refusedConsentState
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
@@ -33,7 +35,10 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       CONFIG_API_URL: E2E_API_URL,
-      CONFIG_WEB3FORMS_ACCESS_KEY: E2E_WEB3FORMS_KEY
+      CONFIG_WEB3FORMS_ACCESS_KEY: E2E_WEB3FORMS_KEY,
+      // No /analytics proxy: the specs mock it, and must never reach a backend from .env.
+      ANALYTICS_API_URL: '',
+      ANALYTICS_PROXY_SECRET: ''
     }
   }
 })

@@ -158,8 +158,12 @@ test.describe('Find nearest church', () => {
     }).toBe(true)
     // The list replaces the illustration: beside the form on desktop, under the search button on smaller screens.
     await expect(section(page).locator('svg[viewBox="0 0 400 300"]')).toHaveCount(0)
-    const button = (await section(page).getByRole('button', { name: 'Buscar igrejas' }).boundingBox())!
-    const list = (await region.boundingBox())!
+    // Both boxes in one frame: measured separately, a scroll still settling moves the page in between.
+    const [button, list] = await page.evaluate(() => {
+      const box = (el: Element | null) => el!.getBoundingClientRect().toJSON() as { x: number; y: number; width: number; height: number }
+      const buttons = [...document.querySelectorAll('button')].filter((b) => b.textContent?.includes('Buscar igrejas'))
+      return [box(buttons[0]), box(document.querySelector('[aria-labelledby="church-list-heading"]'))]
+    })
     if (testInfo.project.name === 'desktop') {
       expect(list.x + list.width).toBeLessThanOrEqual(button.x)
     } else {

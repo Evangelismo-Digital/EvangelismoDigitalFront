@@ -1,0 +1,146 @@
+/* src/components/css/CookieConsentBanner.module.css */
+
+/* Non-modal: it sits over the bottom of the page without trapping focus or dimming the content. */
+.banner {
+    --accent-text: #b93a17;           /* AA: 5.7:1 with white */
+
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1040;                     /* above the fixed navbar (1030), below Bootstrap modals (1055) */
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    font-family: "Arimo", sans-serif;
+    color: var(--black2);
+}
+
+.inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    border-top: 4px solid var(--primary1);
+    border-radius: 16px;
+    background: var(--white);
+    box-shadow: 0 8px 32px rgba(39, 39, 39, 0.18);
+}
+
+.text {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    margin: 0 0 6px;
+    font-family: inherit;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.description {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--secondary1);
+}
+
+.link {
+    color: var(--accent-text);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+}
+
+.link:focus-visible {
+    outline: 3px solid var(--accent-text);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Both choices look the same: refusing is exactly as easy as accepting. */
+.actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.button {
+    min-width: 120px;
+    min-height: 48px;
+    padding: 0 24px;
+    border: 2px solid var(--accent-text);
+    border-radius: 999px;
+    background: var(--accent-text);
+    color: var(--white);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.button:hover {
+    background: #9e3113;
+    border-color: #9e3113;
+}
+
+.button:focus-visible {
+    outline: 3px solid var(--accent-text);
+    outline-offset: 3px;
+}
+
+/* Reopened from the footer: the choice in force is marked, the other stays fully available. */
+.button[aria-pressed="true"]::before {
+    content: "✓ ";
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        transition: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .inner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding: 16px;
+    }
+
+    .actions .button {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+/* Phones: the same content in less of the screen. */
+@media (max-width: 575px) {
+    .banner {
+        padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    }
+
+    .inner {
+        gap: 12px;
+        padding: 14px 14px 12px;
+        border-radius: 14px;
+    }
+
+    .title {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .description {
+        font-size: 0.8125rem;
+        line-height: 1.45;
+    }
+
+    .button {
+        min-height: 44px;
+        font-size: 0.9375rem;
+    }
+}

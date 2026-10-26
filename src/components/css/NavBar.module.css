@@ -23,3 +23,8 @@
         margin-top: 15px;
     }
 }
+/* In CSS rather than an inline style: the prerendered HTML re-serializes inline styles, which
+   React's development build reports as a hydration mismatch. */
+.logo {
+    max-height: 30px;
+}

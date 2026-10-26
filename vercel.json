@@ -1,3 +1,26 @@
 {
-  "cleanUrls": true
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/analytics/(.*)",
+      "methods": ["POST", "OPTIONS"],
+      "dest": "${ANALYTICS_API_URL}/analytics/$1",
+      "env": ["ANALYTICS_API_URL"],
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "delete",
+          "target": { "key": "x-analytics-proxy" }
+        },
+        {
+          "type": "request.headers",
+          "op": "set",
+          "target": { "key": "x-analytics-proxy" },
+          "args": "$ANALYTICS_PROXY_SECRET",
+          "env": ["ANALYTICS_PROXY_SECRET"]
+        }
+      ]
+    }
+  ]
 }

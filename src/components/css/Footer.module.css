@@ -1,18 +1,59 @@
 .footer{
     border-top: 2px solid var(--primary1);
-    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 16px 20px;
+}
+
+.social{
     display: flex;
     gap: 30px;
     align-items: center;
     justify-content: center;
+    min-height: 34px;
 }
 
-.footer a svg{
+.social a svg{
     width: 100%;
     height: 100%;
 }
-.footer a{
+.social a{
     width: 30px;
     color: var(--secondary1);
     display: block;
+}
+
+/* Privacy policy and the cookie choice, reachable from every page. */
+.legal{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 24px;
+}
+
+.legalLink{
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: "Arimo", sans-serif;
+    font-size: 0.875rem;
+    color: var(--secondary1);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.legalLink:hover{
+    color: #b93a17;
+}
+
+.legalLink:focus-visible{
+    outline: 3px solid #b93a17;
+    outline-offset: 2px;
+    border-radius: 2px;
 }

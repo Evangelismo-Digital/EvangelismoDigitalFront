@@ -64,3 +64,24 @@
   }
   .logoImg{ height: 140px; width: auto; }
 }
+
+/* The arrow that overlaps the card's bottom edge. In CSS rather than inline styles: the prerendered
+   HTML re-serializes inline styles, which React's development build reports as a hydration mismatch. */
+.cardWithArrow {
+  position: relative;
+  overflow: visible;
+  padding-bottom: 40px;
+}
+
+.arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -35px;
+}
+
+.arrowImage {
+  width: 80px;
+  height: 80px;
+  display: block;
+}

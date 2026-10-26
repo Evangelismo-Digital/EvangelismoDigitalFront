@@ -1,0 +1,8 @@
+/* src/routes/css/Layout.module.css */
+
+/* Page column under the fixed navbar. In CSS rather than an inline style: the prerendered HTML
+   re-serializes inline styles, which React's development build reports as a hydration mismatch. */
+.content {
+    padding-top: 40px;
+    max-width: 1000px;
+}

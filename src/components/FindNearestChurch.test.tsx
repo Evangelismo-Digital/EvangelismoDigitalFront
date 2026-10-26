@@ -5,8 +5,11 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 import FindNearestChurch, { CORREIOS_CEP_SEARCH_URL, NO_CHURCHES_WALKING_MESSAGE } from './FindNearestChurch'
 import { NEAREST_CHURCHES_MESSAGES } from '../util/nearestChurchesApi'
 import { jsonResponse, nearestResponse } from '../test/churchFixtures'
+import { track } from '../analytics/analytics'
 
 vi.mock('../config/api', () => ({ API_URL: 'http://api.test', WEB3FORMS_ACCESS_KEY: 'test-key' }))
+// Analytics only runs with consent; here it is a spy so the reported search can be checked.
+vi.mock('../analytics/analytics', () => ({ track: vi.fn() }))
 
 type Route = (url: string) => Response | Promise<Response>
 
@@ -66,6 +69,9 @@ describe('FindNearestChurch', () => {
       expect(screen.getByRole('heading', { level: 1, name: 'Encontre uma igreja perto de você' })).toBeInTheDocument()
       expect(screen.getByText('digite seu CEP para se conectar com nossa equipe de voluntários e com igrejas perto de você.')).toHaveClass('lead')
       expect(cepInput()).toHaveAttribute('inputmode', 'numeric')
+      // Fixed ids (not useId), so the prerendered HTML and the hydrated page agree (React #418).
+      expect(cepInput()).toHaveAttribute('id', 'find-church-cep')
+      expect(emailInput()).toHaveAttribute('id', 'find-church-email')
       expect(cepInput()).toHaveAttribute('autocomplete', 'postal-code')
       expect(emailInput()).toHaveAttribute('autocomplete', 'email')
       expect(submit()).toHaveTextContent('Buscar igrejas')
@@ -547,6 +553,46 @@ describe('FindNearestChurch', () => {
       await screen.findByRole('region', { name: 'Igrejas mais próximas' })
 
       expect(scrollCalls().calls[0]).toEqual([{ behavior: 'auto', block: 'start' }])
+    })
+  })
+
+  describe('analytics (only reaches the backend with consent)', () => {
+    const searchEvents = () => vi.mocked(track).mock.calls.map(([event]) => event).filter((e) => e.eventType === 'search')
+
+    beforeEach(() => {
+      vi.mocked(track).mockClear()
+    })
+
+    it('reports a search that found churches: mode and count, never the CEP or email', async () => {
+      const { user } = renderSection()
+
+      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await search(user, '24020085', 'maria@email.com')
+
+      await waitFor(() => expect(searchEvents()).toHaveLength(1))
+      expect(searchEvents()[0]).toEqual({
+        eventType: 'search',
+        path: '/',
+        payload: { mode: 'transport', outcome: 'found', resultCount: 5 },
+      })
+      expect(JSON.stringify(searchEvents())).not.toMatch(/24020|maria/)
+    })
+
+    it('reports "none" when no church is nearby, and "error" when the search failed', async () => {
+      backend = (url) => url.includes('mode=transport')
+        ? jsonResponse(null, 503)
+        : jsonResponse({ message: 'x', code: 'NO_NEARBY_CHURCHES_FOUND' }, 404)
+      const { user } = renderSection()
+
+      await search(user, '24020085')
+      await screen.findByRole('alert')
+      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+
+      await waitFor(() => expect(searchEvents()).toHaveLength(2))
+      expect(searchEvents().map((e) => e.payload)).toEqual([
+        { mode: 'pedestrian', outcome: 'none', resultCount: 0 },
+        { mode: 'transport', outcome: 'error', resultCount: 0 },
+      ])
     })
   })
 

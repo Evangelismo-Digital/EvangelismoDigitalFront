@@ -8,33 +8,19 @@ const QuemSomos = ({
 }) => {
   return (
     <div className="container">
-      <div
-        className={styles.card}
-        style={{ position: 'relative', overflow: 'visible', paddingBottom: 40 }}
-      >
+      <div className={`${styles.card} ${styles.cardWithArrow}`}>
         <div className={styles.cardContent + " d-flex flex-column justify-content-center mt-4"}>
           <h2 className={styles.title + " text-center"}>
             Quem Somos
           </h2>
           <p className={styles.text}>{quemSomosText}</p>
         </div>
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            bottom: -35, 
-          }}
-        >
+        <div className={styles.arrow}>
           <a href={href ? href : "#"} aria-label="Ir para baixo">
             <img
               src="/arrow_down.svg"
               alt="seta para baixo"
-              style={{
-                width: 80,
-                height: 80,
-                display: 'block'
-              }}
+              className={styles.arrowImage}
             />
           </a>
         </div>
