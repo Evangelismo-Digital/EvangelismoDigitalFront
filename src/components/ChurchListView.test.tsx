@@ -59,10 +59,10 @@ describe('ChurchListView', () => {
     expect(within(stops()[1]).getByText('1,4 km a pé')).toBeInTheDocument()
   })
 
-  it('shows driving distances when travelling by car', () => {
+  it('shows driving distances when travelling by transport', () => {
     renderList(churches, '24020085', 'transport')
 
-    expect(within(stops()[0]).getByText('450 m de carro')).toBeInTheDocument()
+    expect(within(stops()[0]).getByText('450 m por transporte')).toBeInTheDocument()
     expect(screen.queryByText(/a pé/)).not.toBeInTheDocument()
   })
 
@@ -74,49 +74,39 @@ describe('ChurchListView', () => {
     expect(MISSING_ADDRESS_TEXT).toBe('Endereço não informado — toque para ver no mapa.')
   })
 
-  it('links each stop to the exact point on Google Maps in a new tab', () => {
+  it('announces the church name, distance and travel mode on the directions link', () => {
     renderList()
 
-    const link = within(stops()[0]).getByRole('link', { name: /Ver no Google Maps/ })
-    expect(link).toHaveAttribute('href', 'https://www.google.com/maps/search/?api=1&query=-22.894623%2C-43.123987')
-    expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(link).toHaveTextContent('Ver no Google Maps')
-  })
-
-  it('announces rank, name, distance, address and action on the map link', () => {
-    renderList()
-
-    expect(within(stops()[0]).getByRole('link', { name: /Ver no Google Maps/ })).toHaveAccessibleName(
-      '1ª igreja: Igreja Batista Central, a 450 m a pé. R. da Conceição, 100 - Centro, Niterói - RJ Ver no Google Maps (abre em nova aba).'
+    expect(within(stops()[0]).getByRole('link', { name: /^Como chegar/ })).toHaveAccessibleName(
+      'Como chegar a Igreja Batista Central a pé pelo Google Maps (abre em nova aba).'
     )
-    expect(within(stops()[2]).getByRole('link', { name: /Ver no Google Maps/ })).toHaveAccessibleName(
-      `3ª igreja: Comunidade Evangélica Ingá, a 2,1 km a pé. ${MISSING_ADDRESS_TEXT} Ver no Google Maps (abre em nova aba).`
+    expect(within(stops()[2]).getByRole('link', { name: /^Como chegar/ })).toHaveAccessibleName(
+      'Como chegar a Comunidade Evangélica Ingá a pé pelo Google Maps (abre em nova aba).'
     )
   })
 
   it('offers walking directions when travelling on foot', () => {
     renderList()
 
-    const link = within(stops()[1]).getByRole('link', { name: 'Como chegar a Igreja Presbiteriana Icaraí a pé pelo Google Maps (abre em nova aba).' })
+    const link = within(stops()[1]).getByRole('link', { name: /Como chegar a Igreja Presbiteriana Icaraí a pé/ })
     expect(link).toHaveAttribute('href', 'https://www.google.com/maps/dir/?api=1&origin=-22.896800%2C-43.123600&destination=-22.903000%2C-43.108000&travelmode=walking')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(link).toHaveTextContent('Como chegar')
+    expect(link).toHaveTextContent('Como chegar?')
   })
 
-  it('offers driving directions when travelling by car', () => {
+  it('offers driving directions when travelling by transport', () => {
     renderList(churches, '24020085', 'transport')
 
-    const link = within(stops()[1]).getByRole('link', { name: 'Como chegar a Igreja Presbiteriana Icaraí de carro pelo Google Maps (abre em nova aba).' })
+    const link = within(stops()[1]).getByRole('link', { name: /Como chegar a Igreja Presbiteriana Icaraí por transporte/ })
     expect(link).toHaveAttribute('href', 'https://www.google.com/maps/dir/?api=1&origin=-22.896800%2C-43.123600&destination=-22.903000%2C-43.108000&travelmode=driving')
   })
 
-  it('starts every "Como chegar" at the searched CEP', () => {
+  it('starts every "Como chegar?" at the searched CEP', () => {
     renderList()
 
     for (const stop of stops()) {
-      expect(within(stop).getByRole('link', { name: /^Como chegar/ }).getAttribute('href')).toMatch(
+      expect(within(stop).getByRole('link', { name: /Como chegar/ }).getAttribute('href')).toMatch(
         /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&origin=-22\.896800%2C-43\.123600&destination=/
       )
     }
@@ -125,7 +115,7 @@ describe('ChurchListView', () => {
   it('leaves the start to the device when the backend sent no origin', () => {
     render(<ChurchListView userCep="24020085" mode="pedestrian" churches={churches} />)
 
-    const link = within(stops()[0]).getByRole('link', { name: /^Como chegar/ })
+    const link = within(stops()[0]).getByRole('link', { name: /Como chegar/ })
     expect(link).toHaveAttribute('href', 'https://www.google.com/maps/dir/?api=1&destination=-22.894623%2C-43.123987&travelmode=walking')
   })
 
@@ -133,23 +123,22 @@ describe('ChurchListView', () => {
     const { container } = renderList()
 
     expect(container.querySelectorAll('a a')).toHaveLength(0)
-    expect(screen.getAllByRole('link')).toHaveLength(10)
+    expect(screen.getAllByRole('link')).toHaveLength(5)
     expect(container.textContent).not.toMatch(/-22\.\d{4}/)
   })
 
-  it('decorates every stop with its three inline icons, hidden from screen readers', () => {
+  it('decorates every stop with its two inline icons, hidden from screen readers', () => {
     renderList()
 
     for (const stop of stops()) {
       const icons = stop.querySelectorAll('svg')
-      expect(icons).toHaveLength(3)
+      expect(icons).toHaveLength(2)
       icons.forEach((icon) => {
         expect(icon).toHaveAttribute('aria-hidden', 'true')
         expect(icon).toHaveAttribute('focusable', 'false')
       })
       expect(stop.querySelector('p svg')).not.toBeNull()
-      expect(within(stop).getByRole('link', { name: /Ver no Google Maps/ }).querySelector('svg')).not.toBeNull()
-      expect(within(stop).getByRole('link', { name: /^Como chegar/ }).querySelector('svg')).not.toBeNull()
+      expect(within(stop).getByRole('link', { name: /Como chegar/ }).querySelector('svg')).not.toBeNull()
     }
   })
 

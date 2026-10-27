@@ -77,14 +77,22 @@ test.describe('Find nearest church', () => {
     await expect(section(page).locator('iframe')).toHaveCount(0)
     await expect(page.getByRole('region', { name: 'Igrejas mais próximas' })).toHaveCount(0)
 
-    // The button comes after every field.
-    const cepBox = await section(page).getByLabel('CEP').boundingBox()
-    const emailBox = await section(page).getByLabel('Email').boundingBox()
-    const phoneBox = await section(page).getByLabel('Telefone (opcional)').boundingBox()
-    const buttonBox = await section(page).getByRole('button', { name: 'Buscar igrejas' }).boundingBox()
-    expect(emailBox!.y).toBeGreaterThan(cepBox!.y + cepBox!.height)
-    expect(phoneBox!.y).toBeGreaterThan(emailBox!.y + emailBox!.height)
-    expect(buttonBox!.y).toBeGreaterThan(phoneBox!.y + phoneBox!.height)
+    // The button comes after every field; measure in one frame so a settling scroll cannot shift them.
+    const [cepBox, emailBox, phoneBox, buttonBox] = await section(page).evaluate((el) => {
+      const box = (selector: string) => {
+        const { y, height } = el.querySelector(selector)!.getBoundingClientRect()
+        return { y, height }
+      }
+      return [
+        box('input[autocomplete="postal-code"]'),
+        box('input[type="email"]'),
+        box('input[type="tel"]'),
+        box('button[type="submit"]'),
+      ]
+    })
+    expect(emailBox.y).toBeGreaterThan(cepBox.y + cepBox.height)
+    expect(phoneBox.y).toBeGreaterThan(emailBox.y + emailBox.height)
+    expect(buttonBox.y).toBeGreaterThan(phoneBox.y + phoneBox.height)
 
     expect(backendUrls).toEqual([])
     expect(mapsScripts).toEqual([])
@@ -132,10 +140,9 @@ test.describe('Find nearest church', () => {
     await expect(cards(page).nth(4).getByText('12,8 km a pé')).toBeVisible()
     await expect(cards(page).nth(2).getByText('Endereço não informado — toque para ver no mapa.')).toBeVisible()
 
-    const mapLinks = cards(page).getByRole('link', { name: /Ver no Google Maps/ })
-    await expect(mapLinks.first()).toHaveAttribute('href', 'https://www.google.com/maps/search/?api=1&query=-22.894623%2C-43.123987')
-    await expect(mapLinks.first()).toHaveAttribute('rel', 'noopener noreferrer')
     const directions = cards(page).getByRole('link', { name: /^Como chegar/ })
+    await expect(directions.first()).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\/dir\//)
+    await expect(directions.first()).toHaveAttribute('rel', 'noopener noreferrer')
     await expect(directions.nth(1)).toHaveAttribute('href', 'https://www.google.com/maps/dir/?api=1&origin=-22.896800%2C-43.123600&destination=-22.903000%2C-43.108000&travelmode=walking')
 
     await expectNoHorizontalOverflow(page)
@@ -176,17 +183,18 @@ test.describe('Find nearest church', () => {
     await page.screenshot({ path: testInfo.outputPath('results-in-view.png') })
   })
 
-  test('opens the exact point when the card itself is tapped', async ({ page }) => {
+  test('opens directions from the searched CEP when the card itself is tapped', async ({ page }) => {
     await mockNetwork(page)
     await page.goto('/')
     await search(page, '24020085')
 
-    // The heading is covered by the stretched map link; force a real click at its position.
+    // The heading is covered by the stretched directions link; force a real click at its position.
     const popupPromise = page.waitForEvent('popup')
     await tapThrough(page, cards(page).first().getByRole('heading', { level: 3 }))
     const popup = await popupPromise
 
-    expect(popup.url()).toBe('https://www.google.com/maps/search/?api=1&query=-22.894623%2C-43.123987')
+    // The route starts at the origin the backend sent for the CEP, not wherever the device happens to be.
+    expect(popup.url()).toBe('https://www.google.com/maps/dir/?api=1&origin=-22.896800%2C-43.123600&destination=-22.894623%2C-43.123987&travelmode=walking')
   })
 
   test('opens directions from the searched CEP, not the exact point, from "Como chegar"', async ({ page }) => {
@@ -244,25 +252,25 @@ test.describe('Find nearest church', () => {
 
     await search(page, '24020085')
     await expect(section(page).getByRole('alert')).toHaveText(/Nenhuma igreja a até 10 km a pé desse CEP\./)
-    await section(page).getByRole('button', { name: 'Ver igrejas de carro' }).click()
+    await section(page).getByRole('button', { name: 'Ver igrejas por transporte' }).click()
 
     await expect(cards(page)).toHaveCount(5)
-    await expect(cards(page).first().getByText('450 m de carro')).toBeVisible()
-    await expect(section(page).getByRole('radio', { name: 'De carro' })).toBeChecked()
+    await expect(cards(page).first().getByText('450 m por transporte')).toBeVisible()
+    await expect(section(page).getByRole('radio', { name: 'Por transporte' })).toBeChecked()
     await expect(cards(page).first().getByRole('link', { name: /^Como chegar/ }))
       .toHaveAttribute('href', /travelmode=driving$/)
     expect(backendUrls).toEqual([NEAREST_URL, NEAREST_URL.replace('pedestrian', 'transport')])
   })
 
-  test('switching to "De carro" after a search repeats it by car', async ({ page }) => {
+  test('switching to "Por transporte" after a search repeats it by transport', async ({ page }) => {
     const { backendUrls } = await mockNetwork(page)
     await page.goto('/')
     await search(page, '24020085')
     await expect(cards(page).first().getByText('450 m a pé')).toBeVisible()
 
-    await section(page).getByText('De carro', { exact: true }).click()
+    await section(page).getByText('Por transporte', { exact: true }).click()
 
-    await expect(cards(page).first().getByText('450 m de carro')).toBeVisible()
+    await expect(cards(page).first().getByText('450 m por transporte')).toBeVisible()
     expect(backendUrls).toEqual([NEAREST_URL, NEAREST_URL.replace('pedestrian', 'transport')])
   })
 
@@ -272,7 +280,7 @@ test.describe('Find nearest church', () => {
     )
     await page.goto('/')
 
-    await section(page).getByText('De carro', { exact: true }).click()
+    await section(page).getByText('Por transporte', { exact: true }).click()
     await search(page, '24020085')
 
     await expect(section(page).getByRole('alert')).toHaveText('Ainda não temos igrejas cadastradas perto desse CEP.')

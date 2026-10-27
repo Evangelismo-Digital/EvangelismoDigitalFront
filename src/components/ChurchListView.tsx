@@ -19,12 +19,6 @@ const PinIcon = () => (
     </svg>
 );
 
-const ExternalIcon = () => (
-    <svg className={styles.icon} viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-        <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
 const DirectionsIcon = () => (
     <svg className={styles.icon} viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
         <path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -50,7 +44,6 @@ function ChurchListView({ userCep, mode, churches, origin = null }: ChurchListVi
 
                 <ol className={styles.stops}>
                     {visibleChurches.map((church, index) => {
-                        const rank = index + 1;
                         const isNearest = index === 0;
                         const distance = `${formatDistancePtBr(church.distanceKm)} ${travel.distanceSuffix}`;
                         const address = church.address ?? MISSING_ADDRESS_TEXT;
@@ -70,17 +63,6 @@ function ChurchListView({ userCep, mode, churches, origin = null }: ChurchListVi
                                     </p>
                                     <div className={styles.actions}>
                                         <a
-                                            className={styles.mapLink}
-                                            href={buildGoogleMapsUrl(church, 'exact-point')}
-                                            data-analytics="maps-point"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            aria-label={`${rank}ª igreja: ${church.name}, a ${distance}. ${address} Ver no Google Maps (abre em nova aba).`}
-                                        >
-                                            <ExternalIcon />
-                                            Ver no Google Maps
-                                        </a>
-                                        <a
                                             className={styles.directionsLink}
                                             href={buildGoogleMapsUrl(church, 'directions', travel.googleTravelMode, origin)}
                                             data-analytics="maps-directions"
@@ -89,7 +71,7 @@ function ChurchListView({ userCep, mode, churches, origin = null }: ChurchListVi
                                             aria-label={`Como chegar a ${church.name} ${travel.distanceSuffix} pelo Google Maps (abre em nova aba).`}
                                         >
                                             <DirectionsIcon />
-                                            Como chegar
+                                            Como chegar?
                                         </a>
                                     </div>
                                 </div>

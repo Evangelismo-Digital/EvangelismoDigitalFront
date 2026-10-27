@@ -1,6 +1,15 @@
+/* src/components/css/FormContato.module.css */
+
 .formcontato {
+    --ink: var(--black2, #1e293b);
+    --muted: var(--secondary1, #475569);
+    --accent: var(--primary1, #f97316);
+    --accent-text: #b93a17;           /* AA: 5.7:1 with white, 5.1:1 on --primary5 */
+
     width: 100%;
-    padding: 0.3rem;
+    padding: 0;
+    font-family: "Arimo", sans-serif;
+    color: var(--ink);
 }
 
 .formcontato > form {
@@ -10,140 +19,211 @@
     width: 100%;
 }
 
-.formcontato label {
-    width: 100%;
+.field {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    font-weight: 500;
-}
-
-.formcontato input[type="text"],
-.formcontato input[type="email"] {
-    width: 100%;
-    padding: 12px 16px;
-    background-color: rgba(0, 0, 0, 0.021);
-    border: none;
-    border-radius: 10px;
-    outline: 1px solid var(--primary4);
-    box-shadow: 0px 3px 0px var(--primary2);
-    font-size: 1rem;
-    transition: outline 0.2s;
-}
-
-.formcontato input[type="text"]:focus,
-.formcontato input[type="email"]:focus {
-    outline: 2px solid var(--primary1);
-}
-
-.formcontato .checkboxLabel {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
+    gap: 6px;
     width: 100%;
     cursor: pointer;
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: var(--secondary1);
-    text-decoration: underline;
+    margin: 0;
 }
 
-.formcontato .checkboxInput {
-    --w: 30px;
-    width: var(--w);
-    height: var(--w);
-    appearance: none;
-    background-color: rgba(0, 0, 0, 0.021);
-    border-radius: 50%;
-    outline: 2px solid var(--primary3);
-    box-shadow: 0px 2px 0px var(--primary2);
+.label {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.9375rem;
+    line-height: 1.4;
     cursor: pointer;
+}
+
+/* An input with its icon drawn inside, on the left */
+.inputWrap {
     position: relative;
-    flex-shrink: 0;
-    transition: all 0.2s;
-    order: -1;
+    display: flex;
+    align-items: center;
+    width: 100%;
 }
 
-.formcontato .checkboxInput:checked {
-    background-color: var(--primary2);
-    outline: 2px solid var(--primary1);
-}
-
-.formcontato .checkboxInput:checked::after {
-    content: '✓';
+.inputWrap > .icon {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--white);
-    font-size: 18px;
-    font-weight: bold;
+    left: 16px;
+    color: var(--secondary2);
+    pointer-events: none;
+    transition: color 0.15s ease;
+    flex-shrink: 0;
 }
 
-.formcontato .checkboxInput:focus {
-    outline: 2px solid var(--primary1);
+.inputWrap:focus-within > .icon {
+    color: var(--accent-text);
 }
 
-.formcontato button {
-    background-color: var(--primary2);
-    border-radius: 25px;
-    border: none;
-    color: var(--white);
-    width: 300px;
-    height: 45px;
-    margin: 20px auto 0;
+.input {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 16px 10px 46px;
+    background-color: var(--secundary5);
+    border: 1px solid var(--secondary4);
+    border-radius: 12px;
     font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    color: var(--ink);
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
 
-.formcontato button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+.input::placeholder {
+    color: var(--secondary2);
 }
 
-.formcontato button:active {
-    transform: translateY(0);
+.input:focus {
+    outline: none;
+    background-color: var(--white);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--primary1_20);
+}
+
+.input[aria-invalid="true"] {
+    border-color: var(--accent-text);
 }
 
 .errorMessage {
-    color: var(--primary1);
+    color: var(--accent-text);
     font-size: 0.875rem;
     min-height: 20px;
-    margin-top: 2px;
+    margin: 2px 0 0;
     width: 100%;
     text-align: left;
 }
 
-.errorSubmissionMessage {
-    color: var(--primary1);
-    font-size: 1rem;
-    min-height: 20px;
-    margin-top: 2px;
+.checkboxLabel {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
     width: 100%;
-    text-align: center;
+    cursor: pointer;
+    margin: 6px 0 10px;
+    min-height: 44px; /* WCAG 2.1 touch target */
 }
 
-@media (max-width: 1024px) {
-    .formcontato{
-        padding: 0;
-    }
+.checkboxInput {
+    width: 22px;
+    height: 22px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--secundary5);
+    border: 1.5px solid var(--secondary4);
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    margin: 0;
+}
 
-    .formcontato > form {
-        gap: 0;
-    }
-    .formcontato input[type="text"],
-    .formcontato input[type="email"] {
-        padding: 5px;
-    }
-    .formcontato .checkboxInput {
-        --w:20px;
-    }
-    .formcontato button {
-        width: 100% !important;
-        margin: 30px 0 0 0;
+.checkboxInput:hover {
+    border-color: var(--accent);
+}
+
+.checkboxInput:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--primary1_20);
+}
+
+.checkboxInput:checked {
+    background-color: var(--accent-text);
+    border-color: var(--accent-text);
+}
+
+.checkboxInput:checked::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkboxText {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--muted);
+    line-height: 1.4;
+    user-select: none;
+    transition: color 0.15s ease;
+}
+
+.checkboxLabel:hover .checkboxText {
+    color: var(--ink);
+}
+
+.submitButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 56px;
+    margin-top: 8px;
+    padding: 0 28px;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--accent-text);
+    color: var(--white);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.submitButton:hover:not(:disabled) {
+    background-color: #9d3113;
+    box-shadow: 0 4px 12px rgba(185, 58, 23, 0.25);
+    transform: translateY(-1px);
+}
+
+.submitButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submitButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.submitButton:focus-visible {
+    outline: 3px solid var(--accent-text);
+    outline-offset: 2px;
+}
+
+.buttonIcon {
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+}
+
+.submitButton:hover:not(:disabled) .buttonIcon {
+    transform: translateX(2px) translateY(-1px);
+}
+
+.buttonSpinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+    .submitButton {
+        min-height: 50px;
+        font-size: 1rem;
     }
 }

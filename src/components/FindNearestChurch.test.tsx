@@ -136,7 +136,7 @@ describe('FindNearestChurch', () => {
 
       const icons = [
         screen.getByText('A pé').querySelector('svg'),
-        screen.getByText('De carro').querySelector('svg'),
+        screen.getByText('Por transporte').querySelector('svg'),
         cepInput().parentElement?.querySelector('svg'),
         emailInput().parentElement?.querySelector('svg'),
         submit().querySelector('svg'),
@@ -170,17 +170,17 @@ describe('FindNearestChurch', () => {
 
       const group = screen.getByRole('group', { name: 'Como você vai até a igreja?' })
       expect(within(group).getByRole('radio', { name: 'A pé' })).toBeChecked()
-      expect(within(group).getByRole('radio', { name: 'De carro' })).not.toBeChecked()
+      expect(within(group).getByRole('radio', { name: 'Por transporte' })).not.toBeChecked()
     })
 
-    it('searches by car when "De carro" is chosen', async () => {
+    it('searches by car when "Por transporte" is chosen', async () => {
       const { user } = renderSection()
 
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
       await search(user, '24020085')
 
       const region = await screen.findByRole('region', { name: 'Igrejas mais próximas' })
-      expect(within(region).getByText('450 m de carro')).toBeInTheDocument()
+      expect(within(region).getByText('450 m por transporte')).toBeInTheDocument()
       expect(String(backendCalls()[0][0])).toBe('http://api.test/churches/nearest?cep=24020085&mode=transport')
     })
 
@@ -189,9 +189,9 @@ describe('FindNearestChurch', () => {
 
       await search(user, '24020085')
       await screen.findByText('450 m a pé')
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
 
-      expect(await screen.findByText('450 m de carro')).toBeInTheDocument()
+      expect(await screen.findByText('450 m por transporte')).toBeInTheDocument()
       await user.click(screen.getByRole('radio', { name: 'A pé' }))
       expect(await screen.findByText('450 m a pé')).toBeInTheDocument()
       expect(backendCalls().map(([url]) => String(url).split('?')[1])).toEqual([
@@ -203,7 +203,7 @@ describe('FindNearestChurch', () => {
     it('does not search when the travel mode changes before any search', async () => {
       const { user } = renderSection()
 
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
 
       expect(fetchMock).not.toHaveBeenCalled()
       expect(screen.queryByRole('region', { name: 'Igrejas mais próximas' })).not.toBeInTheDocument()
@@ -352,12 +352,12 @@ describe('FindNearestChurch', () => {
 
       await search(user, '24020085', 'maria@email.com')
       await screen.findByText('450 m a pé')
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
-      await screen.findByText('450 m de carro')
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
+      await screen.findByText('450 m por transporte')
 
       await waitFor(() => expect(web3formsCalls()).toHaveLength(2))
       expect(leadBody(0)).toMatchObject({ email: 'maria@email.com', como_vai: 'a pé' })
-      expect(leadBody(1)).toMatchObject({ email: 'maria@email.com', como_vai: 'de carro' })
+      expect(leadBody(1)).toMatchObject({ email: 'maria@email.com', como_vai: 'por transporte' })
     })
 
     it('reports each search with the email submitted with it', async () => {
@@ -464,7 +464,7 @@ describe('FindNearestChurch', () => {
       const { user } = renderSection()
 
       await user.type(cepInput(), '24020085')
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
 
       expect(scrollCalls().calls).toHaveLength(0)
     })
@@ -502,8 +502,8 @@ describe('FindNearestChurch', () => {
       const afterError = scrollCalls().calls.length
       expect(afterError).toBeGreaterThanOrEqual(1)
 
-      await user.click(screen.getByRole('button', { name: 'Ver igrejas de carro' }))
-      await screen.findByText('450 m de carro')
+      await user.click(screen.getByRole('button', { name: 'Ver igrejas por transporte' }))
+      await screen.findByText('450 m por transporte')
 
       await waitFor(() => expect(scrollCalls().calls.length).toBeGreaterThan(afterError))
     })
@@ -566,7 +566,7 @@ describe('FindNearestChurch', () => {
     it('reports a search that found churches: mode and count, never the CEP or email', async () => {
       const { user } = renderSection()
 
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
       await search(user, '24020085', 'maria@email.com')
 
       await waitFor(() => expect(searchEvents()).toHaveLength(1))
@@ -586,7 +586,7 @@ describe('FindNearestChurch', () => {
 
       await search(user, '24020085')
       await screen.findByRole('alert')
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
 
       await waitFor(() => expect(searchEvents()).toHaveLength(2))
       expect(searchEvents().map((e) => e.payload)).toEqual([
@@ -609,29 +609,29 @@ describe('FindNearestChurch', () => {
       expect(NO_CHURCHES_WALKING_MESSAGE).toBe('Nenhuma igreja a até 10 km a pé desse CEP.')
       expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument()
 
-      await user.click(screen.getByRole('button', { name: 'Ver igrejas de carro' }))
+      await user.click(screen.getByRole('button', { name: 'Ver igrejas por transporte' }))
 
       const region = await screen.findByRole('region', { name: 'Igrejas mais próximas' })
-      expect(within(region).getByText('450 m de carro')).toBeInTheDocument()
-      expect(screen.getByRole('radio', { name: 'De carro' })).toBeChecked()
+      expect(within(region).getByText('450 m por transporte')).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: 'Por transporte' })).toBeChecked()
       expect(backendCalls().map(([url]) => String(url).split('?')[1])).toEqual([
         'cep=24020085&mode=pedestrian',
         'cep=24020085&mode=transport',
       ])
       await waitFor(() => expect(web3formsCalls()).toHaveLength(2))
       expect(leadBody(0)).toMatchObject({ como_vai: 'a pé', igreja_mais_proxima: 'nenhuma encontrada' })
-      expect(leadBody(1)).toMatchObject({ como_vai: 'de carro', igreja_mais_proxima: 'Igreja Batista Central' })
+      expect(leadBody(1)).toMatchObject({ como_vai: 'por transporte', igreja_mais_proxima: 'Igreja Batista Central' })
     })
 
     it('explains that no church is registered near the CEP by car, with no fallback or retry', async () => {
       backend = () => jsonResponse({ message: 'Nenhuma igreja encontrada nas proximidades.', code: 'NO_NEARBY_CHURCHES_FOUND' }, 404)
       const { user } = renderSection()
 
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
       await search(user, '24020085')
 
       expect(await screen.findByRole('alert')).toHaveTextContent(NEAREST_CHURCHES_MESSAGES['no-churches'])
-      expect(screen.queryByRole('button', { name: 'Ver igrejas de carro' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Ver igrejas por transporte' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Tentar novamente' })).not.toBeInTheDocument()
       expect(screen.queryByRole('region', { name: 'Igrejas mais próximas' })).not.toBeInTheDocument()
       expect(backendCalls()).toHaveLength(1)
@@ -650,11 +650,11 @@ describe('FindNearestChurch', () => {
     it('records the travel mode in the lead', async () => {
       const { user } = renderSection()
 
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
       await search(user, '24020085', 'maria@email.com')
 
       await waitFor(() => expect(web3formsCalls()).toHaveLength(1))
-      expect(leadBody()).toMatchObject({ como_vai: 'de carro', igreja_mais_proxima: 'Igreja Batista Central' })
+      expect(leadBody()).toMatchObject({ como_vai: 'por transporte', igreja_mais_proxima: 'Igreja Batista Central' })
     })
 
     it('still sends the lead, saying none was found', async () => {
@@ -730,8 +730,8 @@ describe('FindNearestChurch', () => {
 
       await search(user, '24020085')
       await screen.findByRole('alert')
-      await user.click(screen.getByRole('radio', { name: 'De carro' }))
-      await screen.findByText('450 m de carro')
+      await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
+      await screen.findByText('450 m por transporte')
       // Back on foot: the failed walking search is fetched again, and this time it finds churches.
       await user.click(screen.getByRole('radio', { name: 'A pé' }))
       await screen.findByText('450 m a pé')
@@ -739,7 +739,7 @@ describe('FindNearestChurch', () => {
       await waitFor(() => expect(web3formsCalls()).toHaveLength(3))
       expect(web3formsCalls().map((_, index) => [leadBody(index).como_vai, leadBody(index).igreja_mais_proxima])).toEqual([
         ['a pé', 'nenhuma encontrada'],
-        ['de carro', 'Igreja Batista Central'],
+        ['por transporte', 'Igreja Batista Central'],
         ['a pé', 'Igreja Batista Central'],
       ])
     })
@@ -830,11 +830,11 @@ describe('FindNearestChurch phone (optional)', () => {
     await search(user, '24020085')
     await screen.findByRole('region', { name: 'Igrejas mais próximas' })
     await waitFor(() => expect(web3formsCalls()).toHaveLength(1))
-    await user.click(screen.getByRole('radio', { name: 'De carro' }))
+    await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
 
     await waitFor(() => expect(web3formsCalls()).toHaveLength(2))
     expect(leadBody(0)).toMatchObject({ email: 'maria@email.com', telefone: '(21) 98765-4321', como_vai: 'a pé' })
-    expect(leadBody(1)).toMatchObject({ email: 'maria@email.com', telefone: '(21) 98765-4321', como_vai: 'de carro' })
+    expect(leadBody(1)).toMatchObject({ email: 'maria@email.com', telefone: '(21) 98765-4321', como_vai: 'por transporte' })
   })
 
   it('lays the phone out as a field with its icon', () => {

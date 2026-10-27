@@ -27,11 +27,11 @@ describe('buildChurchSearchLeadFields', () => {
     expect(NO_CHURCH_FOUND_TEXT).toBe('nenhuma encontrada')
     expect(fields.igreja_mais_proxima).toBe('nenhuma encontrada')
     expect(fields.message).toContain('Igreja mais próxima: nenhuma encontrada')
-    expect(fields.como_vai).toBe('de carro')
+    expect(fields.como_vai).toBe('por transporte')
     expect(NO_PHONE_TEXT).toBe('não informado')
     expect(fields.telefone).toBe('não informado')
     expect(fields.message).toContain('Telefone: não informado')
-    expect(fields.message).toContain('Como vai: de carro')
+    expect(fields.message).toContain('Como vai: por transporte')
   })
 })
 

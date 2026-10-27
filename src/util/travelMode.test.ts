@@ -9,7 +9,7 @@ describe('travel modes', () => {
   it('uses the approved copy and Google Maps travel modes', () => {
     expect(TRAVEL_MODES).toEqual({
       pedestrian: { option: 'A pé', distanceSuffix: 'a pé', googleTravelMode: 'walking' },
-      transport: { option: 'De carro', distanceSuffix: 'de carro', googleTravelMode: 'driving' },
+      transport: { option: 'Por transporte', distanceSuffix: 'por transporte', googleTravelMode: 'driving' },
     })
   })
 
