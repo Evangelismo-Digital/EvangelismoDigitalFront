@@ -1,80 +1,112 @@
+/* src/components/css/FormContatoHome.module.css */
+
+.container,
 .form {
+    --ink: var(--black2);
+    --muted: var(--secondary1);
+    --accent: var(--primary1);
+    --accent-text: #b93a17;
+
     width: 100%;
-    max-width: 1400px;
     margin: 60px auto 0;
     padding: 0 20px;
+    font-family: "Arimo", sans-serif;
+    color: var(--ink);
+    box-sizing: border-box;
+    scroll-margin-top: 80px;
 }
 
-.form h1 {
+.title {
     font-size: clamp(1.75rem, 5vw, 3rem);
     text-align: center;
     font-weight: bold;
     color: var(--secondary1);
-    margin-bottom: 40px;
+    margin-bottom: 10px;
 }
 
-.form > div:last-child {
+.lead {
+    max-width: 34rem;
+    margin: 0 auto 32px;
+    padding: 0 16px;
+    text-align: center;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--muted);
+}
+
+.card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    grid-template-areas: "aside form";
+    align-items: center;
+    gap: 40px;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 40px;
     border: 2px solid var(--primary2);
     border-radius: 25px;
-    overflow: hidden;
-    background: white;
+    background: var(--white);
+    box-sizing: border-box;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
-/* Mobile First - até 1199px */
-@media (max-width: 1199px) {
-    .form > div:last-child {
-        display: flex;
-        flex-direction: column;
-        padding: 30px 20px;
+.art {
+    grid-area: aside;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.illustration {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    object-fit: contain;
+}
+
+.formContent {
+    grid-area: form;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+}
+
+@media (max-width: 991px) {
+    .container,
+    .form {
+        padding: 0 16px;
+        margin-top: 40px;
+    }
+
+    .card {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "aside"
+            "form";
+        padding: 28px 20px;
+        gap: 24px;
+    }
+
+    .illustration {
+        max-width: 320px;
+    }
+}
+
+@media (max-width: 600px) {
+    .container,
+    .form {
+        padding: 0 12px;
+    }
+
+    .card {
+        padding: 20px 14px;
+        border-radius: 20px;
         gap: 20px;
     }
 
-    .form > div > div:first-child {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .form > div > div:first-child img {
-        max-width: 100%;
-        width: 100%;
-        max-width: 500px;
-        height: auto;
-        object-fit: contain;
-    }
-
-    .form > div > div:last-child {
-        width: 100%;
-    }
-}
-
-/* Desktop - a partir de 1200px */
-@media (min-width: 1200px) {
-    .form > div:last-child {
-        display: grid;
-        grid-template-columns: 1.2fr 1fr;
-        align-items: center;
-        padding: 40px;
-        gap: 40px;
-        min-height: 500px;
-    }
-
-    .form > div > div:first-child {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .form > div > div:first-child img {
-        width: 100%;
-        max-width: 600px;
-        height: auto;
-        object-fit: contain;
-    }
-
-    .form > div > div:last-child {
-        display: flex;
-        align-items: center;
+    .illustration {
+        max-width: 260px;
     }
 }

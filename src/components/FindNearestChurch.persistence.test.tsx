@@ -135,7 +135,7 @@ describe('FindNearestChurch with saved results', () => {
     backend = () => jsonResponse(null, 503)
     const { user } = visit()
 
-    await user.click(screen.getByRole('radio', { name: 'De carro' }))
+    await user.click(screen.getByRole('radio', { name: 'Por transporte' }))
     await search(user, '24020085')
 
     expect(await screen.findByRole('alert')).toBeInTheDocument()

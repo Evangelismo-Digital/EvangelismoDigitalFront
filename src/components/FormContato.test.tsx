@@ -87,11 +87,12 @@ describe('FormContato phone (optional)', () => {
     renderForm()
 
     for (const label of [/Nome:/, /Sobrenome:/, /Email:/, /Telefone \(opcional\):/]) {
-      expect(screen.getByLabelText(label)).toHaveValue('')
+      const input = screen.getByLabelText(label)
+      expect(input).toHaveValue('')
+      const errorLine = input.closest('label')!.nextElementSibling
+      expect(errorLine?.textContent).toBe('\u00A0')
     }
     expect(screen.getByRole('checkbox')).not.toBeChecked()
-    const errorLine = screen.getByLabelText(/Telefone \(opcional\):/).closest('label')!.nextElementSibling
-    expect(errorLine?.textContent).toBe('\u00A0')
   })
 
   it('masks the phone while typing and sends it formatted', async () => {
@@ -126,5 +127,69 @@ describe('FormContato phone (optional)', () => {
 
     expect(await screen.findByText('Digite um telefone válido com DDD.')).toBeInTheDocument()
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('FormContato fields and accessibility', () => {
+  it('renders decorative icons with aria-hidden inside inputs and submit button', () => {
+    renderForm()
+    const nameInput = screen.getByLabelText(/Nome:/)
+    const lastNameInput = screen.getByLabelText(/Sobrenome:/)
+    const emailInput = screen.getByLabelText(/Email:/)
+    const phoneInput = screen.getByLabelText(/Telefone \(opcional\):/)
+    const submitBtn = screen.getByRole('button', { name: /Enviar/ })
+
+    for (const el of [nameInput, lastNameInput, emailInput, phoneInput, submitBtn]) {
+      const svg = (el.parentElement?.querySelector('svg') || el.querySelector('svg'))!
+      expect(svg).toBeInTheDocument()
+      expect(svg).toHaveAttribute('aria-hidden', 'true')
+      expect(svg).toHaveAttribute('focusable', 'false')
+    }
+  })
+
+  it('sets aria-invalid, aria-describedby and role="alert" when validation fails', async () => {
+    const user = renderForm()
+    const nameInput = screen.getByLabelText(/Nome:/)
+    const lastNameInput = screen.getByLabelText(/Sobrenome:/)
+    const emailInput = screen.getByLabelText(/Email:/)
+    const phoneInput = screen.getByLabelText(/Telefone \(opcional\):/)
+
+    expect(nameInput).not.toHaveAttribute('aria-invalid')
+    expect(nameInput).not.toHaveAttribute('aria-describedby')
+    expect(lastNameInput).not.toHaveAttribute('aria-invalid')
+    expect(lastNameInput).not.toHaveAttribute('aria-describedby')
+    expect(emailInput).not.toHaveAttribute('aria-invalid')
+    expect(emailInput).not.toHaveAttribute('aria-describedby')
+    expect(phoneInput).not.toHaveAttribute('aria-invalid')
+    expect(phoneInput).not.toHaveAttribute('aria-describedby')
+
+    await user.click(screen.getByRole('button', { name: /Enviar/ }))
+
+    const nameError = await screen.findByText('Digite um nome.')
+    const lastNameError = await screen.findByText('Digite um sobrenome.')
+    const emailError = await screen.findByText('Digite um email.')
+
+    expect(nameInput).toHaveAttribute('aria-invalid', 'true')
+    expect(nameInput).toHaveAttribute('aria-describedby', 'form-contato-name-error')
+    expect(nameError).toHaveAttribute('role', 'alert')
+    expect(nameError).toHaveAttribute('id', 'form-contato-name-error')
+
+    expect(lastNameInput).toHaveAttribute('aria-invalid', 'true')
+    expect(lastNameInput).toHaveAttribute('aria-describedby', 'form-contato-lastname-error')
+    expect(lastNameError).toHaveAttribute('role', 'alert')
+    expect(lastNameError).toHaveAttribute('id', 'form-contato-lastname-error')
+
+    expect(emailInput).toHaveAttribute('aria-invalid', 'true')
+    expect(emailInput).toHaveAttribute('aria-describedby', 'form-contato-email-error')
+    expect(emailError).toHaveAttribute('role', 'alert')
+    expect(emailError).toHaveAttribute('id', 'form-contato-email-error')
+
+    await user.type(phoneInput, '219')
+    await user.tab()
+    const phoneError = await screen.findByText('Digite um telefone válido com DDD.')
+    expect(phoneInput).toHaveAttribute('aria-invalid', 'true')
+    expect(phoneInput).toHaveAttribute('aria-describedby', 'form-contato-phone-error')
+    expect(phoneError).toHaveAttribute('role', 'alert')
+    expect(phoneError).toHaveAttribute('id', 'form-contato-phone-error')
   })
 })

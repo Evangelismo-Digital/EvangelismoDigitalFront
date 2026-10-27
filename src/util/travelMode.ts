@@ -14,7 +14,7 @@ interface TravelModeCopy {
 
 export const TRAVEL_MODES: Record<TravelMode, TravelModeCopy> = {
     pedestrian: { option: 'A pé', distanceSuffix: 'a pé', googleTravelMode: 'walking' },
-    transport: { option: 'De carro', distanceSuffix: 'de carro', googleTravelMode: 'driving' },
+    transport: { option: 'Por transporte', distanceSuffix: 'por transporte', googleTravelMode: 'driving' },
 };
 
 export function isTravelMode(value: unknown): value is TravelMode {

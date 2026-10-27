@@ -176,7 +176,7 @@ function FindNearestChurch() {
                 {walkingFoundNothing && (
                     <button type="button" className={styles.secondaryButton} onClick={() => searchByCar(search.cep)}>
                         <CarIcon />
-                        Ver igrejas de carro
+                        Ver igrejas por transporte
                     </button>
                 )}
                 {RETRYABLE_ERRORS.has(errorKind) && (

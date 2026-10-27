@@ -86,7 +86,7 @@ function PrivacyPage() {
                 <h2>O que medimos, se você aceitar</h2>
                 <ul>
                     <li>As páginas e os artigos que você abre, por quanto tempo os lê (só enquanto a aba está visível) e até onde rola a página.</li>
-                    <li>Nas buscas de igrejas: se você vai a pé ou de carro e se encontramos igrejas. O CEP não entra nessa medição.</li>
+                    <li>Nas buscas de igrejas: se você vai a pé ou por transporte e se encontramos igrejas. O CEP não entra nessa medição.</li>
                     <li>Cliques em links que levam a outros sites (como o Google Maps): registramos apenas o site de destino.</li>
                     <li>No formulário de contato: que ele foi iniciado e enviado, nunca o que você escreveu.</li>
                     <li>
